@@ -83,16 +83,14 @@ export default function AuthFooter(props) {
           <Link
             color='white'
             fontSize='sm'
-            href='#blog'
-            href='https://creative-tim.com/blog'>
+            href='#blog'>
             {document.documentElement.dir === "rtl" ? "مدونة" : "Blog"}
           </Link>
         </ListItem>
         <ListItem>
           <Link
             color='white'
-            href='#license'
-            href='https://www.creative-tim.com/license'>
+            href='#license'>
             {document.documentElement.dir === "rtl" ? "رخصة" : "License"}
           </Link>
         </ListItem>
