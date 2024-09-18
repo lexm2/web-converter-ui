@@ -163,9 +163,9 @@ function Tables() {
                               onClick={() =>
                                 updateQuantity(card.id, card.zone, -1)
                               }
-                              bg="purple.500" // Change background color to match the theme
+                              bg="rgb(72, 87, 200)"
                               color="white"
-                              _hover={{ bg: "purple.600" }}
+                              _hover={{ bg: "rgb(60, 80, 190)" }}
                             >
                               -
                             </Button>
@@ -175,9 +175,9 @@ function Tables() {
                               onClick={() =>
                                 updateQuantity(card.id, card.zone, 1)
                               }
-                              bg="purple.500" // Change background color to match the theme
+                              bg="rgb(72, 87, 200)"
                               color="white"
-                              _hover={{ bg: "purple.600" }}
+                              _hover={{ bg: "rgb(60, 80, 190)" }}
                             >
                               +
                             </Button>
