@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Flex, Table, Tbody, Th, Thead, Tr, Td, Text, Spinner } from "@chakra-ui/react";
+import {
+  Flex,
+  Table,
+  Tbody,
+  Th,
+  Thead,
+  Tr,
+  Td,
+  Text,
+  Spinner,
+  Button,
+} from "@chakra-ui/react";
 
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
@@ -24,7 +35,9 @@ function Tables() {
         if (cachedDeck) {
           const parsedDeck = JSON.parse(cachedDeck);
           const deckInstance = new MTGDeck(parsedDeck.name);
-          deckInstance.cards = parsedDeck.cards.map(card => new MTGCard(card, card.zone));
+          deckInstance.cards = parsedDeck.cards.map(
+            (card) => new MTGCard(card, card.zone)
+          );
           deckInstance.cardCount = parsedDeck.cardCount;
           await deckInstance.loadCardDetails();
           setDeck(deckInstance);
@@ -38,6 +51,21 @@ function Tables() {
     loadDeck();
   }, [location]);
 
+  const updateQuantity = (cardId, zone, delta) => {
+    const updatedDeck = { ...deck };
+    const card = updatedDeck.cards.find(
+      (c) => c.id === cardId && c.zone === zone
+    );
+    if (card) {
+      card.quantity += delta;
+      if (card.quantity < 1) {
+        card.quantity = 1;
+      }
+      setDeck(updatedDeck);
+      localStorage.setItem("cachedDeck", JSON.stringify(updatedDeck));
+    }
+  };
+
   if (loading) {
     return (
       <Flex
@@ -50,9 +78,15 @@ function Tables() {
     );
   }
 
-  const zones = ["Main", "Sideboard", "Command Zone", "Planes/Schemes", "Maybeboard"];
+  const zones = [
+    "Main",
+    "Sideboard",
+    "Command Zone",
+    "Planes/Schemes",
+    "Maybeboard",
+  ];
   const cardsByZone = zones.reduce((acc, zone) => {
-    acc[zone] = deck.cards.filter(card => card.zone === zone);
+    acc[zone] = deck.cards.filter((card) => card.zone === zone);
     return acc;
   }, {});
 
@@ -105,17 +139,50 @@ function Tables() {
                 </Tr>
               </Thead>
               <Tbody>
-                {zones.map(zone => (
+                {zones.map((zone) => (
                   <React.Fragment key={zone}>
                     <Tr>
-                      <Td colSpan="11" style={{ fontWeight: 'bold', backgroundColor: '#2D3748', color: '#fff' }}>
+                      <Td
+                        colSpan="11"
+                        style={{
+                          fontWeight: "bold",
+                          backgroundColor: "#2D3748",
+                          color: "#fff",
+                        }}
+                      >
                         {zone}
                       </Td>
                     </Tr>
                     {cardsByZone[zone].map((card, index) => (
                       <Tr key={index}>
                         <Td>{card.name}</Td>
-                        <Td>{card.quantity}</Td>
+                        <Td>
+                          <Flex align="center">
+                            <Button
+                              size="xs"
+                              onClick={() =>
+                                updateQuantity(card.id, card.zone, -1)
+                              }
+                              bg="purple.500" // Change background color to match the theme
+                              color="white"
+                              _hover={{ bg: "purple.600" }}
+                            >
+                              -
+                            </Button>
+                            <Text mx="2">{card.quantity}</Text>
+                            <Button
+                              size="xs"
+                              onClick={() =>
+                                updateQuantity(card.id, card.zone, 1)
+                              }
+                              bg="purple.500" // Change background color to match the theme
+                              color="white"
+                              _hover={{ bg: "purple.600" }}
+                            >
+                              +
+                            </Button>
+                          </Flex>
+                        </Td>
                         <Td>{card.typeLine}</Td>
                         <Td>{card.manaCost}</Td>
                         <Td>{card.cmc}</Td>

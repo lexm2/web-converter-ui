@@ -17,6 +17,7 @@ class MTGCard {
     this.rarity = cardData.rarity;
     this.imageUris = cardData.image_uris;
     this.zone = sectionName;
+    this.quantity = cardData.quantity;
   }
 }
 
@@ -28,10 +29,8 @@ class MTGDeck {
   }
 
   addCard(card, quantity = 1) {
-    for (let i = 0; i < quantity; i++) {
-      this.cards.push(card);
-      this.cardCount++;
-    }
+    this.cards.push(card);
+    this.cardCount += quantity;
   }
 
   removeCard(cardId, quantity = 1) {
@@ -84,10 +83,11 @@ class MTGDeck {
 
     for (const [cardKey, quantity] of parsedCards) {
       const cardData = {
-        id: cardKey.cardName, // Using cardName as id for simplicity
+        id: cardKey.cardName,
         name: cardKey.cardName,
         set_name: cardKey.set,
-        type_line: cardKey.sectionName, // Using sectionName as type_line for simplicity
+        zone: cardKey.sectionName,
+        quantity: quantity
       };
       const card = new MTGCard(cardData, cardKey.sectionName); // Pass zone to MTGCard
       this.addCard(card, quantity);
@@ -216,13 +216,13 @@ class MTGDeck {
     function downloadStringAsFile(stringData, defaultFilename) {
       const userFilename = prompt("Enter a filename:", defaultFilename);
       if (!userFilename) return; // User cancelled the prompt
-  
+
       const filename = userFilename.endsWith(".od8")
         ? userFilename
         : `${userFilename}.od8`;
       const blob = new Blob([stringData], { type: "text/plain" });
       const url = URL.createObjectURL(blob);
-  
+
       const link = document.createElement("a");
       link.href = url;
       link.download = filename;
