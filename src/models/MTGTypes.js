@@ -1,7 +1,8 @@
-import XMLWriter from "./XMLWriter";
+import axios from "axios";
+import API from "./API";
 
 class MTGCard {
-  constructor(cardData) {
+  constructor(cardData, sectionName) {
     this.id = cardData.id;
     this.name = cardData.name;
     this.manaCost = cardData.mana_cost;
@@ -14,6 +15,7 @@ class MTGCard {
     this.setName = cardData.set_name;
     this.rarity = cardData.rarity;
     this.imageUris = cardData.image_uris;
+    this.zone = sectionName;
   }
 }
 
@@ -47,76 +49,50 @@ class MTGDeck {
     return this.cardCount;
   }
 
-  writeXML() {
-    const xw = new XMLWriter("UTF-8", "1.0");
-    xw.formatting = "indented";
-    xw.indentChar = " ";
-    xw.indentation = 2;
+  async loadCardDetails() {
+    const client = axios.create({
+      baseURL: "https://api.scryfall.com/",
+    });
 
-    xw.writeStartDocument(true);
-    xw.writeStartElement("deck");
-    xw.writeAttributeString("game", "a6c8d2e8-7cd8-11dd-8f94-e62b56d89593");
+    const identifiers = this.cards.map((card) => ({ name: card.name }));
+    const collection = await API.getCollection(client, identifiers);
 
-    // Group cards by type
-    const cardsByType = this.cards.reduce((acc, card) => {
-      const type = card.typeLine.split(" ")[0]; // Use the first word of typeLine as the section name
-      if (!acc[type]) {
-        acc[type] = [];
+    collection.data.forEach((cardData) => {
+      const card = this.cards.find((c) => c.name === cardData.name);
+      if (card) {
+        card.id = cardData.id;
+        card.name = cardData.name;
+        card.manaCost = cardData.mana_cost;
+        card.cmc = cardData.cmc;
+        card.typeLine = cardData.type_line;
+        card.oracleText = cardData.oracle_text;
+        card.power = cardData.power;
+        card.toughness = cardData.toughness;
+        card.colors = cardData.colors;
+        card.setName = cardData.set_name;
+        card.rarity = cardData.rarity;
+        card.imageUris = cardData.image_uris;
       }
-      acc[type].push(card);
-      return acc;
-    }, {});
-
-    // Write sections
-    for (const [type, cards] of Object.entries(cardsByType)) {
-      xw.writeStartElement("section");
-      xw.writeAttributeString("name", type);
-
-      // Count occurrences of each unique card
-      const cardCounts = cards.reduce((acc, card) => {
-        acc[card.id] = (acc[card.id] || 0) + 1;
-        return acc;
-      }, {});
-
-      // Write cards
-      for (const [cardId, count] of Object.entries(cardCounts)) {
-        const card = cards.find((c) => c.id === cardId);
-        xw.writeStartElement("card");
-        xw.writeAttributeString("qty", count.toString());
-        xw.writeAttributeString("id", card.id);
-        xw.writeString(card.name);
-        xw.writeEndElement();
-      }
-
-      xw.writeEndElement(); // Close section
-    }
-
-    xw.writeEndElement(); // Close deck
-    xw.writeEndDocument();
-
-    const xml = xw.flush();
-    xw.close();
-
-    this.downloadStringAsFile(xml, `${this.name}.od8`);
+    });
   }
 
-  downloadStringAsFile(stringData, defaultFilename) {
-    const userFilename = prompt("Enter a filename:", defaultFilename);
-    if (!userFilename) return; // User cancelled the prompt
+  async importDeckList(deckListString) {
+    const parsedCards = this.parseDeckList(deckListString);
+    this.cards = [];
+    this.cardCount = 0;
 
-    const filename = userFilename.endsWith(".od8")
-      ? userFilename
-      : `${userFilename}.od8`;
-    const blob = new Blob([stringData], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
+    for (const [cardKey, quantity] of parsedCards) {
+      const cardData = {
+        id: cardKey.cardName, // Using cardName as id for simplicity
+        name: cardKey.cardName,
+        set_name: cardKey.set,
+        type_line: cardKey.sectionName, // Using sectionName as type_line for simplicity
+      };
+      const card = new MTGCard(cardData, cardKey.sectionName); // Pass zone to MTGCard
+      this.addCard(card, quantity);
+    }
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-
-    link.click();
-
-    URL.revokeObjectURL(url);
+    await this.loadCardDetails();
   }
 
   parseDeckList(deckListString) {
@@ -185,50 +161,6 @@ class MTGDeck {
 
     return cards;
   }
-
-  importDeckList(deckListString) {
-    const parsedCards = this.parseDeckList(deckListString);
-    this.cards = [];
-    this.cardCount = 0;
-
-    for (const [cardKey, quantity] of parsedCards) {
-      const cardData = {
-        id: cardKey.cardName, // Using cardName as id for simplicity
-        name: cardKey.cardName,
-        set_name: cardKey.set,
-        type_line: cardKey.sectionName, // Using sectionName as type_line for simplicity
-      };
-      const card = new MTGCard(cardData);
-      this.addCard(card, quantity);
-    }
-  }
-
-  async loadCardDetails() {
-    const client = axios.create({
-      baseURL: "https://api.scryfall.com/",
-    });
-
-    const identifiers = this.cards.map((card) => ({ name: card.name }));
-    const collection = await API.getCollection(client, identifiers);
-
-    collection.data.forEach((cardData) => {
-      const card = this.cards.find((c) => c.name === cardData.name);
-      if (card) {
-        card.id = cardData.id;
-        card.name = cardData.name;
-        card.manaCost = cardData.mana_cost;
-        card.cmc = cardData.cmc;
-        card.typeLine = cardData.type_line;
-        card.oracleText = cardData.oracle_text;
-        card.power = cardData.power;
-        card.toughness = cardData.toughness;
-        card.colors = cardData.colors;
-        card.setName = cardData.set_name;
-        card.rarity = cardData.rarity;
-        card.imageUris = cardData.image_uris;
-      }
-    });
-  }
 }
 
-export default MTGDeck;
+export { MTGCard, MTGDeck };

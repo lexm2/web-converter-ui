@@ -13,7 +13,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import { NavLink } from "react-router-dom";
 import routes from "routes.js";
-import MTGDeck from "models/MTGTypes";
+import { MTGDeck } from "models/MTGTypes";
 
 export default function AuthNavbar(props) {
   const [open, setOpen] = React.useState(false);

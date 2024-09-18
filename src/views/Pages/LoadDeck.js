@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useHistory } from "react-router-dom";
+import { MTGDeck } from "models/MTGTypes";
 import {
   Box,
   Flex,
@@ -8,13 +10,10 @@ import {
   Heading,
   Input,
   Text,
-  DarkMode,
 } from "@chakra-ui/react";
-
 import signInImage from "assets/img/signInImage.png";
 import AuthFooter from "components/Footer/AuthFooter";
 import GradientBorder from "components/GradientBorder/GradientBorder";
-import MTGDeck from "models/MTGTypes";
 
 function LoadDeck() {
   const titleColor = "white";
@@ -22,6 +21,7 @@ function LoadDeck() {
 
   const [cachedDeck, setCachedDeck] = useState(null);
   const decklistInputRef = useRef(null);
+  const history = useHistory();
 
   useEffect(() => {
     const savedDeck = localStorage.getItem("cachedDeck");
@@ -30,12 +30,12 @@ function LoadDeck() {
     }
   }, []);
 
-  const handleLoadFromText = () => {
+  const handleLoadFromText = async () => {
     const decklistText = decklistInputRef.current.value;
 
     if (decklistText) {
       const newDeck = new MTGDeck("Imported Deck");
-      newDeck.importDeckList(decklistText);
+      await newDeck.importDeckList(decklistText);
 
       setCachedDeck(newDeck);
       localStorage.setItem("cachedDeck", JSON.stringify(newDeck));
@@ -43,31 +43,36 @@ function LoadDeck() {
       console.log("Deck loaded and cached successfully!");
 
       // Redirect to /tables route with the cached deck
-      navigate("/tables", { state: { deck: newDeck } });
+      history.push("/admin/tables", { deck: newDeck });
     } else {
       console.log("Please enter a decklist.");
     }
   };
-  const handleQuickLoadFromText = () => {};
+  const handleQuickLoadFromText = () => {
+    const decklistText = decklistInputRef.current.value;
+    const deck = new MTGDeck("Imported Deck");
+    deck.importDeckList(decklistText);
+    deck.writeXML();
+  };
 
   const handleLoadFromFile = () => {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
     fileInput.accept = ".txt";
-    fileInput.onchange = (e) => {
+    fileInput.onchange = async (e) => {
       const file = e.target.files[0];
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
         const deckListString = event.target.result;
         const newDeck = new MTGDeck("Imported Deck");
-        newDeck.importDeckList(deckListString);
+        await newDeck.importDeckList(deckListString);
 
         setCachedDeck(newDeck);
         localStorage.setItem("cachedDeck", JSON.stringify(newDeck));
 
         console.log("Deck loaded from file and cached successfully!");
 
-        navigate("/tables", { state: { deck: newDeck } });
+        history.push("/admin/tables", { deck: newDeck });
       };
       reader.readAsText(file);
     };
