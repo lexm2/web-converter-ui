@@ -1,5 +1,6 @@
 import axios from "axios";
 import API from "./API";
+import XMLWriter from "./XMLWriter";
 
 class MTGCard {
   constructor(cardData, sectionName) {
@@ -160,6 +161,76 @@ class MTGDeck {
     }
 
     return cards;
+  }
+
+  async writeXML() {
+    const xw = new XMLWriter("UTF-8", "1.0");
+    xw.formatting = "indented";
+    xw.indentChar = " ";
+    xw.indentation = 2;
+
+    xw.writeStartDocument(true);
+    xw.writeStartElement("deck");
+    xw.writeAttributeString("game", "a6c8d2e8-7cd8-11dd-8f94-e62b56d89593");
+
+    // Group cards by type
+    const cardsByType = this.cards.reduce((acc, card) => {
+      const type = card.typeLine.split(" ")[0]; // Use the first word of typeLine as the section name
+      if (!acc[type]) {
+        acc[type] = [];
+      }
+      acc[type].push(card);
+      return acc;
+    }, {});
+
+    // Write sections
+    for (const [type, cards] of Object.entries(cardsByType)) {
+      xw.writeStartElement("section");
+      xw.writeAttributeString("name", type);
+
+      // Count occurrences of each unique card
+      const cardCounts = cards.reduce((acc, card) => {
+        acc[card.id] = (acc[card.id] || 0) + 1;
+        return acc;
+      }, {});
+
+      // Write cards
+      for (const [cardId, count] of Object.entries(cardCounts)) {
+        const card = cards.find((c) => c.id === cardId);
+        xw.writeStartElement("card");
+        xw.writeAttributeString("qty", count.toString());
+        xw.writeAttributeString("id", card.id);
+        xw.writeString(card.name);
+        xw.writeEndElement();
+      }
+
+      xw.writeEndElement(); // Close section
+    }
+
+    xw.writeEndElement(); // Close deck
+    xw.writeEndDocument();
+
+    const xml = xw.flush();
+    xw.close();
+
+    function downloadStringAsFile(stringData, defaultFilename) {
+      const userFilename = prompt("Enter a filename:", defaultFilename);
+      if (!userFilename) return; // User cancelled the prompt
+  
+      const filename = userFilename.endsWith(".od8")
+        ? userFilename
+        : `${userFilename}.od8`;
+      const blob = new Blob([stringData], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+  
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    downloadStringAsFile(xml, `${this.name}.od8`);
   }
 }
 
