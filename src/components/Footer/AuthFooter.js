@@ -38,60 +38,33 @@ export default function AuthFooter(props) {
           base: "center",
         }}
         mb={{ base: "20px" }}>
-        &copy; {1900 + new Date().getYear()},{" "}
         <Text as='span' mx='2px'>
-          {document.documentElement.dir === "rtl"
-            ? " مصنوع من ❤️ بواسطة"
-            : "Made with ❤️ by "}
+          Made with ❤️ by Lex
         </Text>
-        <Link href='https://www.simmmple.com' target='_blank'>
-          {document.documentElement.dir === "rtl"
-            ? " توقيت الإبداعية"
-            : "Simmmple "}
-        </Link>
-        &
-        <Link href='https://www.creative-tim.com' target='_blank'>
-          {document.documentElement.dir === "rtl" ? "سيممبل " : " Creative Tim"}
-        </Link>
-        {document.documentElement.dir === "rtl"
-          ? "للحصول على ويب أفضل"
-          : " for a better web"}
       </Text>
       <List display='flex'>
         <ListItem
           me={{
             base: "20px",
           }}>
-          <Link color='white' fontSize='sm' href='https://www.simmmple.com'>
-            {document.documentElement.dir === "rtl"
-              ? "توقيت الإبداعية"
-              : "Simmmple"}
+          <Link color='white' fontSize='sm' href='#/admin/dashboard'>
+            Dashboard
           </Link>
         </ListItem>
         <ListItem
           me={{
             base: "20px",
           }}>
-          <Link color='white' fontSize='sm' href='https://www.creative-tim.com'>
-            {document.documentElement.dir === "rtl" ? "سيممبل" : "Creative Tim"}
+          <Link color='white' fontSize='sm' href='#/admin/tables'>
+            Tables
           </Link>
         </ListItem>
         <ListItem
           me={{
             base: "20px",
           }}>
-          <Link
-            color='white'
-            fontSize='sm'
-            href='#blog'>
-            {document.documentElement.dir === "rtl" ? "مدونة" : "Blog"}
-          </Link>
-        </ListItem>
-        <ListItem>
-          <Link
-            color='white'
-            href='#license'>
-            {document.documentElement.dir === "rtl" ? "رخصة" : "License"}
+          <Link color='white' fontSize='sm' href='#/auth/load-deck'>
+            Load Deck
           </Link>
         </ListItem>
       </List>
