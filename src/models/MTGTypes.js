@@ -87,7 +87,7 @@ class MTGDeck {
         name: cardKey.cardName,
         set_name: cardKey.set,
         zone: cardKey.sectionName,
-        quantity: quantity
+        quantity: quantity,
       };
       const card = new MTGCard(cardData, cardKey.sectionName); // Pass zone to MTGCard
       this.addCard(card, quantity);
@@ -175,7 +175,8 @@ class MTGDeck {
 
     // Group cards by type
     const cardsByType = this.cards.reduce((acc, card) => {
-      const type = card.typeLine.split(" ")[0]; // Use the first word of typeLine as the section name
+      console.log(card);
+      const type = card.typeLine.split(" ")[0];
       if (!acc[type]) {
         acc[type] = [];
       }
@@ -231,6 +232,16 @@ class MTGDeck {
     }
 
     downloadStringAsFile(xml, `${this.name}.od8`);
+  }
+
+  static fromCachedDeck(cachedDeck) {
+    const parsedDeck = JSON.parse(cachedDeck);
+    const deckInstance = new MTGDeck(parsedDeck.name);
+    deckInstance.cards = parsedDeck.cards.map(
+      (card) => new MTGCard(card, card.zone)
+    );
+    deckInstance.cardCount = parsedDeck.cardCount;
+    return deckInstance;
   }
 }
 
