@@ -82,13 +82,11 @@ class MTGDeck {
 
   async loadCardDetails() {
     console.log(this.cards);
-    if (cachedCards) {
-      let newHash = this.hashCards();
-      console.log(cardsHash, newHash);
-      if (cardsHash === newHash) {
-        this.cards = cachedCards;
-        return cachedCards;
-      }
+    let newHash = this.hashCards();
+    console.log(cardsHash == newHash);
+    if (cardsHash == newHash) {
+      this.cards = cachedCards;
+      return cachedCards;
     }
 
     const client = axios.create({
