@@ -80,7 +80,7 @@ class MTGDeck {
     if (cachedCards) {
       let newHash = this.hashCards();
       if (cardsHash === newHash) {
-        cards = cachedCards;
+        this.cards = cachedCards;
         return cachedCards;
       }
     }
@@ -99,6 +99,7 @@ class MTGDeck {
       const card = this.cards.find(
         (c) => c.name.includes(cardData.name) || cardData.name.includes(c.name)
       );
+      console.log(card);
       if (card) {
         card.id = cardData.id;
         card.name = cardData.name;
