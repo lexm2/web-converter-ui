@@ -1,6 +1,14 @@
 import axios from "axios";
 import API from "./API";
 import XMLWriter from "./XMLWriter";
+import CryptoJS from "crypto-js"; // Import crypto-js for hashing
+
+// Define the Zones array
+const Zones = ["Main", "Sideboard", "Command Zone", "Planes/Schemes", "Maybeboard"];
+
+// Module-level variable to store cached cards
+let cachedCards = null;
+let cardsHash = null;
 
 class MTGCard {
   constructor(cardData, sectionName) {
@@ -31,6 +39,7 @@ class MTGDeck {
   addCard(card, quantity = 1) {
     this.cards.push(card);
     this.cardCount += quantity;
+    this.invalidateCache();
   }
 
   removeCard(cardId, quantity = 1) {
@@ -43,22 +52,52 @@ class MTGDeck {
       }
       return true;
     });
+    this.invalidateCache();
   }
 
   getCardCount() {
     return this.cardCount;
   }
 
+  invalidateCache() {
+    cachedCards = null;
+    cardsHash = null;
+  }
+
+  hashCards() {
+    const cardsString = JSON.stringify(
+      this.cards.map((card) => ({
+        name: card.name.substring(0, 3),
+        quantity: card.quantity,
+        zone: card.zone,
+      }))
+    );
+    return CryptoJS.MD5(cardsString).toString();
+  }
+
   async loadCardDetails() {
+    if (cachedCards) {
+      let newHash = this.hashCards();
+      if (cardsHash === newHash) {
+        this.cards = cachedCards
+        return cachedCards;
+      }
+    }
+
     const client = axios.create({
       baseURL: "https://api.scryfall.com/",
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
 
     const identifiers = this.cards.map((card) => ({ name: card.name }));
     const collection = await API.getCollection(client, identifiers);
 
     collection.data.forEach((cardData) => {
-      const card = this.cards.find((c) => c.name === cardData.name);
+      const card = this.cards.find(
+        (c) => c.name.includes(cardData.name) || cardData.name.includes(c.name)
+      );
       if (card) {
         card.id = cardData.id;
         card.name = cardData.name;
@@ -74,6 +113,12 @@ class MTGDeck {
         card.imageUris = cardData.image_uris;
       }
     });
+
+    // Assign the cache only after the request is done
+    cachedCards = collection.data;
+    console.log(cachedCards);
+    cardsHash = this.hashCards();
+    return collection.data;
   }
 
   async importDeckList(deckListString) {
@@ -173,25 +218,23 @@ class MTGDeck {
     xw.writeStartElement("deck");
     xw.writeAttributeString("game", "a6c8d2e8-7cd8-11dd-8f94-e62b56d89593");
 
-    // Group cards by type
-    const cardsByType = this.cards.reduce((acc, card) => {
-      console.log(card);
-      const type = card.typeLine.split(" ")[0];
-      if (!acc[type]) {
-        acc[type] = [];
+    // Group cards by zone
+    const cardsByZone = this.cards.reduce((acc, card) => {
+      if (!acc[card.zone]) {
+        acc[card.zone] = [];
       }
-      acc[type].push(card);
+      acc[card.zone].push(card);
       return acc;
     }, {});
 
     // Write sections
-    for (const [type, cards] of Object.entries(cardsByType)) {
+    for (const [zone, cards] of Object.entries(cardsByZone)) {
       xw.writeStartElement("section");
-      xw.writeAttributeString("name", type);
+      xw.writeAttributeString("name", zone);
 
       // Count occurrences of each unique card
       const cardCounts = cards.reduce((acc, card) => {
-        acc[card.id] = (acc[card.id] || 0) + 1;
+        acc[card.id] = (acc[card.id] || 0) + card.quantity;
         return acc;
       }, {});
 
@@ -235,7 +278,17 @@ class MTGDeck {
   }
 
   static fromCachedDeck(cachedDeck) {
-    const parsedDeck = JSON.parse(cachedDeck);
+    if (!cachedDeck) {
+      throw new Error("Invalid cached deck data: Input is null or empty.");
+    }
+
+    let parsedDeck;
+    try {
+      parsedDeck = JSON.parse(cachedDeck);
+    } catch (error) {
+      throw new Error("Invalid cached deck data: Unable to parse JSON.");
+    }
+
     const deckInstance = new MTGDeck(parsedDeck.name);
     deckInstance.cards = parsedDeck.cards.map(
       (card) => new MTGCard(card, card.zone)
