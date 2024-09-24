@@ -76,10 +76,11 @@ class MTGDeck {
   }
 
   async loadCardDetails() {
+    console.log(this.cards);
     if (cachedCards) {
       let newHash = this.hashCards();
       if (cardsHash === newHash) {
-        this.cards = cachedCards
+        cards = cachedCards;
         return cachedCards;
       }
     }
@@ -116,7 +117,6 @@ class MTGDeck {
 
     // Assign the cache only after the request is done
     cachedCards = collection.data;
-    console.log(cachedCards);
     cardsHash = this.hashCards();
     return collection.data;
   }

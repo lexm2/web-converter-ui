@@ -70,8 +70,6 @@ function LoadDeck() {
         setCachedDeck(newDeck);
         localStorage.setItem("cachedDeck", JSON.stringify(newDeck));
 
-        console.log("Deck loaded from file and cached successfully!");
-
         history.push("/admin/tables", { deck: newDeck });
       };
       reader.readAsText(file);
