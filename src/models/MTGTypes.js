@@ -1,10 +1,15 @@
 import axios from "axios";
 import API from "./API";
 import XMLWriter from "./XMLWriter";
-import CryptoJS from "crypto-js"; // Import crypto-js for hashing
+import CryptoJS from "crypto-js";
 
-// Define the Zones array
-const Zones = ["Main", "Sideboard", "Command Zone", "Planes/Schemes", "Maybeboard"];
+const Zones = [
+  "Main",
+  "Sideboard",
+  "Command Zone",
+  "Planes/Schemes",
+  "Maybeboard",
+];
 
 // Module-level variable to store cached cards
 let cachedCards = null;
@@ -79,6 +84,7 @@ class MTGDeck {
     console.log(this.cards);
     if (cachedCards) {
       let newHash = this.hashCards();
+      console.log(cardsHash, newHash);
       if (cardsHash === newHash) {
         this.cards = cachedCards;
         return cachedCards;
@@ -92,14 +98,19 @@ class MTGDeck {
       },
     });
 
-    const identifiers = this.cards.map((card) => ({ name: card.name }));
+    const identifiers = this.cards.map((card) => {
+      const cardName = card.name.includes(" // ")
+        ? card.name.split(" // ")[0]
+        : card.name;
+      return { name: cardName };
+    });
     const collection = await API.getCollection(client, identifiers);
-
+    console.log(collection.data);
     collection.data.forEach((cardData) => {
       const card = this.cards.find(
         (c) => c.name.includes(cardData.name) || cardData.name.includes(c.name)
       );
-      console.log(card);
+
       if (card) {
         card.id = cardData.id;
         card.name = cardData.name;
@@ -113,6 +124,8 @@ class MTGDeck {
         card.setName = cardData.set_name;
         card.rarity = cardData.rarity;
         card.imageUris = cardData.image_uris;
+      } else {
+        console.log(`Card not found: ${cardData.name}`);
       }
     });
 
