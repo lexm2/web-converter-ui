@@ -16,14 +16,20 @@ import {
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 // TODO: change to swiper.js 3d carousel
-import { Carousel } from 'react-responsive-carousel';
-import 'react-responsive-carousel/lib/styles/carousel.min.css';
-import styled, { keyframes } from 'styled-components';
+import { Carousel } from "react-responsive-carousel";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
+import styled, { keyframes } from "styled-components";
 
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
-import { MTGDeck, MTGCard, importDeckList, writeXML, getCardPrints } from "models/MTGTypes.js"; // Import MTGDeck, MTGCard, importDeckList, and writeXML
+import {
+  MTGDeck,
+  MTGCard,
+  importDeckList,
+  writeXML,
+  getCardPrints,
+} from "models/MTGTypes.js"; // Import MTGDeck, MTGCard, importDeckList, and writeXML
 
 const fadeIn = keyframes`
   from {
@@ -70,6 +76,7 @@ function Tables() {
   });
   const [isCarouselOpen, setIsCarouselOpen] = useState(false);
   const [selectedCardImages, setSelectedCardImages] = useState([]);
+  const [selectedCard, setSelectedCard] = useState(null);
 
   useEffect(() => {
     const loadDeck = async () => {
@@ -118,6 +125,7 @@ function Tables() {
     console.log(artPrintings);
     if (artPrintings && artPrintings.length > 0) {
       setSelectedCardImages(artPrintings);
+      setSelectedCard(card);
       setIsCarouselOpen(true);
     } else {
       alert("No art printings found for this card.");
@@ -126,6 +134,15 @@ function Tables() {
 
   const closeCarousel = () => {
     setIsCarouselOpen(false);
+  };
+
+  const handleSelectCard = () => {
+    if (selectedCard) {
+      console.log(
+        `Selected Card: Name - ${selectedCard.name}, ID - ${selectedCard.id}`
+      );
+      closeCarousel();
+    }
   };
 
   if (loading) {
@@ -236,7 +253,11 @@ function Tables() {
                                         size="xs"
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          updateQuantity(card.id, card.zone, -1);
+                                          updateQuantity(
+                                            card.id,
+                                            card.zone,
+                                            -1
+                                          );
                                         }}
                                         bg="teal.500"
                                         color="white"
@@ -265,7 +286,9 @@ function Tables() {
                                   <Td>{card.edhrecRank}</Td>
                                   <Td>{card.cmc}</Td>
                                   <Td>
-                                    {card.colorIdentity ? card.colorIdentity.join(", ") : ""}
+                                    {card.colorIdentity
+                                      ? card.colorIdentity.join(", ")
+                                      : ""}
                                   </Td>
                                   <Td>{card.rarity}</Td>
                                 </Tr>
@@ -302,6 +325,15 @@ function Tables() {
                 </div>
               ))}
             </Carousel>
+            <Button
+              mt={4}
+              colorScheme="teal"
+              onClick={handleSelectCard}
+              display="block"
+              mx="auto"
+            >
+              Select Card
+            </Button>
           </CarouselContainer>
         </BlurBackground>
       )}
