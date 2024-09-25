@@ -128,10 +128,15 @@ class MTGDeck {
       const cardName = card.name.includes(" // ")
         ? card.name.split(" // ")[0]
         : card.name;
+
+      if (card.name.includes("/")) {
+        cardName = card.name.split("/")[0];
+      }
       return { name: cardName };
     });
 
     const collection = await API.getCollection(client, identifiers);
+    console.log(collection);
     this.cards = collection.data
       .map((cardData) => {
         const existingCard = this.cards.find(
@@ -140,7 +145,6 @@ class MTGDeck {
         );
 
         if (existingCard) {
-          
           // Preserve the quantity field
           const card = new MTGCard(cardData, existingCard.zone);
 
@@ -159,6 +163,18 @@ class MTGDeck {
     cachedCards = this.cards;
     return this.cards;
   }
+}
+
+async function getCardPrints(card) {
+  const client = axios.create({
+    baseURL: "https://api.scryfall.com/",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  const response = await API.getAllPrintings(client, card.printsSearchUri);
+  return response;
 }
 
 function hashDeck(deck) {
@@ -336,4 +352,11 @@ async function writeXML(deck) {
   downloadStringAsFile(xml, `${deck.name}.od8`);
 }
 
-export { MTGCard, MTGDeck, importDeckList, parseDeckList, writeXML };
+export {
+  MTGCard,
+  MTGDeck,
+  importDeckList,
+  parseDeckList,
+  writeXML,
+  getCardPrints,
+};

@@ -13,22 +13,49 @@ import {
   Button,
   Collapse,
   IconButton,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  useDisclosure,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import styled, { keyframes } from 'styled-components';
+import axios from 'axios';
 
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
-import { MTGDeck, MTGCard, importDeckList, writeXML } from "models/MTGTypes.js"; // Import MTGDeck, MTGCard, importDeckList, and writeXML
+import { MTGDeck, MTGCard, importDeckList, writeXML, getCardPrints } from "models/MTGTypes.js"; // Import MTGDeck, MTGCard, importDeckList, and writeXML
+
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+`;
+
+const BlurBackground = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: ${fadeIn} 0.3s ease-in-out;
+  z-index: 1000;
+`;
+
+const CarouselContainer = styled.div`
+  width: 80%;
+  max-width: 800px;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+`;
 
 function Tables() {
   const [deck, setDeck] = useState([]);
@@ -41,7 +68,7 @@ function Tables() {
     "Planes/Schemes": true,
     Maybeboard: true,
   });
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isCarouselOpen, setIsCarouselOpen] = useState(false);
   const [selectedCardImages, setSelectedCardImages] = useState([]);
 
   useEffect(() => {
@@ -86,9 +113,20 @@ function Tables() {
     }));
   };
 
-  const handleRowClick = (card) => {
-    setSelectedCardImages(card.cardFaces.map(face => face.image_uris.large));
-    onOpen();
+  const handleRowClick = async (card) => {
+    const artPrintings = await getCardPrints(card);
+    console.log(artPrintings);
+    console.log(artPrintings[card.name]);
+    if (artPrintings[card.name] && artPrintings[card.name].length > 0) {
+      setSelectedCardImages(artPrintings[card.name]);
+      setIsCarouselOpen(true);
+    } else {
+      alert("No art printings found for this card.");
+    }
+  };
+
+  const closeCarousel = () => {
+    setIsCarouselOpen(false);
   };
 
   if (loading) {
@@ -197,9 +235,10 @@ function Tables() {
                                     <Flex align="center">
                                       <Button
                                         size="xs"
-                                        onClick={() =>
-                                          updateQuantity(card.id, card.zone, -1)
-                                        }
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          updateQuantity(card.id, card.zone, -1);
+                                        }}
                                         bg="teal.500"
                                         color="white"
                                         _hover={{ bg: "teal.600" }}
@@ -210,9 +249,10 @@ function Tables() {
                                       <Text mx="2">{card.quantity}</Text>
                                       <Button
                                         size="xs"
-                                        onClick={() =>
-                                          updateQuantity(card.id, card.zone, 1)
-                                        }
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          updateQuantity(card.id, card.zone, 1);
+                                        }}
                                         bg="teal.500"
                                         color="white"
                                         _hover={{ bg: "teal.600" }}
@@ -244,22 +284,28 @@ function Tables() {
         ) : null}
       </Card>
 
-      <Modal isOpen={isOpen} onClose={onClose} size="xl">
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Card Images</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Carousel>
+      {isCarouselOpen && (
+        <BlurBackground onClick={closeCarousel}>
+          <CarouselContainer onClick={(e) => e.stopPropagation()}>
+            <Carousel
+              showThumbs={false}
+              showStatus={false}
+              infiniteLoop
+              useKeyboardArrows
+              emulateTouch
+              dynamicHeight
+              centerMode
+              centerSlidePercentage={80}
+            >
               {selectedCardImages.map((image, index) => (
                 <div key={index}>
                   <img src={image} alt={`Card face ${index + 1}`} />
                 </div>
               ))}
             </Carousel>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+          </CarouselContainer>
+        </BlurBackground>
+      )}
     </Flex>
   );
 }

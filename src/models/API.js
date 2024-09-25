@@ -20,7 +20,26 @@ class API {
 
   static async getAllPrintings(client, printsSearchUri) {
     const response = await client.get(printsSearchUri);
-    return response.data;
+
+    console.log("responce data", response.data.data);
+
+    const artPrintings = {};
+
+    for (const card of response.data.data) {
+      const cardDetails = await client.get(card.uri);
+      console.log("card uri", card.uri);
+      const cardFaces = cardDetails.data.card_faces || [];
+      artPrintings[card.name] = cardFaces.map(face => face.image_uris?.png).filter(uri => uri);
+    }
+    return artPrintings;
+  }
+
+  static async getAllArtPrintingsForDeck(deck) {
+
+
+    
+
+    return artPrintings;
   }
 }
 
