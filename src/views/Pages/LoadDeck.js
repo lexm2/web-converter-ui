@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useHistory } from "react-router-dom";
-import { MTGDeck } from "models/MTGTypes";
+import { MTGDeck, importDeckList, writeXML } from "models/MTGTypes";
 import {
   Box,
   Flex,
@@ -35,10 +35,10 @@ function LoadDeck() {
 
     if (decklistText) {
       const newDeck = new MTGDeck("Imported Deck");
-      await newDeck.importDeckList(decklistText);
+      const cards = await importDeckList(decklistText);
 
+      newDeck.cards = cards;
       setCachedDeck(newDeck);
-      localStorage.setItem("cachedDeck", JSON.stringify(newDeck));
 
       console.log("Deck loaded and cached successfully!");
 
@@ -48,11 +48,14 @@ function LoadDeck() {
       console.log("Please enter a decklist.");
     }
   };
-  const handleQuickLoadFromText = () => {
+
+  const handleQuickLoadFromText = async () => {
     const decklistText = decklistInputRef.current.value;
-    const deck = new MTGDeck("Imported Deck");
-    deck.importDeckList(decklistText);
-    deck.writeXML();
+    const newDeck = new MTGDeck("Imported Deck");
+    const cards = await importDeckList(decklistText);
+
+    newDeck.cards = cards;
+    writeXML(newDeck);
   };
 
   const handleLoadFromFile = () => {
@@ -65,10 +68,10 @@ function LoadDeck() {
       reader.onload = async (event) => {
         const deckListString = event.target.result;
         const newDeck = new MTGDeck("Imported Deck");
-        await newDeck.importDeckList(deckListString);
+        const cards = await importDeckList(deckListString);
 
+        newDeck.cards = cards;
         setCachedDeck(newDeck);
-        localStorage.setItem("cachedDeck", JSON.stringify(newDeck));
 
         history.push("/admin/tables", { deck: newDeck });
       };

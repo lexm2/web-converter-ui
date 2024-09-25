@@ -1,15 +1,37 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Flex, Table, Tbody, Th, Thead, Tr, Td, Text, Spinner, Button, Collapse, IconButton } from "@chakra-ui/react";
+import {
+  Flex,
+  Table,
+  Tbody,
+  Th,
+  Thead,
+  Tr,
+  Td,
+  Text,
+  Spinner,
+  Button,
+  Collapse,
+  IconButton,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  useDisclosure,
+} from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { Carousel } from 'react-responsive-carousel';
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
-import { MTGDeck, MTGCard } from "models/MTGTypes.js"; // Import MTGDeck and MTGCard
+import { MTGDeck, MTGCard, importDeckList, writeXML } from "models/MTGTypes.js"; // Import MTGDeck, MTGCard, importDeckList, and writeXML
 
 function Tables() {
-  const [deck, setDeck] = useState(null);
+  const [deck, setDeck] = useState([]);
   const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [openZones, setOpenZones] = useState({
@@ -19,23 +41,20 @@ function Tables() {
     "Planes/Schemes": true,
     Maybeboard: true,
   });
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedCardImages, setSelectedCardImages] = useState([]);
 
   useEffect(() => {
     const loadDeck = async () => {
       const loadedDeck = location.state?.deck;
       if (loadedDeck) {
-        await loadedDeck.loadCardDetails();
+        console.log("Loaded deck from local storage:", loadedDeck);
         setDeck(loadedDeck);
-        localStorage.setItem("cachedDeck", JSON.stringify(loadedDeck));
       } else {
         const cachedDeck = localStorage.getItem("cachedDeck");
         if (cachedDeck) {
           const parsedDeck = JSON.parse(cachedDeck);
-          const deckInstance = new MTGDeck(parsedDeck.name);
-          deckInstance.cards = parsedDeck.cards.map(card => new MTGCard(card, card.zone));
-          deckInstance.cardCount = parsedDeck.cardCount;
-          await deckInstance.loadCardDetails();
-          setDeck(deckInstance);
+          setDeck(parsedDeck);
         } else {
           alert("No deck found. Please load a deck first.");
         }
@@ -47,23 +66,29 @@ function Tables() {
   }, [location]);
 
   const updateQuantity = (cardId, zone, delta) => {
-    const updatedDeck = { ...deck };
-    const card = updatedDeck.cards.find(c => c.id === cardId && c.zone === zone);
-    if (card) {
-      card.quantity += delta;
-      if (card.quantity < 1) {
-        card.quantity = 1;
+    const updatedDeck = deck.map((card) => {
+      if (card.id === cardId && card.zone === zone) {
+        return { ...card, quantity: Math.max(1, card.quantity + delta) };
       }
-      setDeck(updatedDeck);
-      localStorage.setItem("cachedDeck", JSON.stringify(updatedDeck));
-    }
+      return card;
+    });
+    setDeck(updatedDeck);
+    localStorage.setItem(
+      "cachedDeck",
+      JSON.stringify({ ...location.state.deck, cards: updatedDeck })
+    );
   };
 
   const toggleZone = (zone) => {
-    setOpenZones(prevState => ({
+    setOpenZones((prevState) => ({
       ...prevState,
       [zone]: !prevState[zone],
     }));
+  };
+
+  const handleRowClick = (card) => {
+    setSelectedCardImages(card.cardFaces.map(face => face.image_uris.large));
+    onOpen();
   };
 
   if (loading) {
@@ -78,9 +103,15 @@ function Tables() {
     );
   }
 
-  const zones = ["Main", "Sideboard", "Command Zone", "Planes/Schemes", "Maybeboard"];
+  const zones = [
+    "Main",
+    "Sideboard",
+    "Command Zone",
+    "Planes/Schemes",
+    "Maybeboard",
+  ];
   const cardsByZone = zones.reduce((acc, zone) => {
-    acc[zone] = deck.cards.filter(card => card.zone === zone);
+    acc[zone] = deck.filter((card) => card.zone === zone);
     return acc;
   }, {});
 
@@ -89,10 +120,12 @@ function Tables() {
       <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
         <CardHeader p="6px 0px 22px 0px">
           <Text fontSize="lg" color="#fff" fontWeight="bold">
-            {deck ? `Deck: ${deck.name}` : "No deck loaded"}
+            {deck.length > 0
+              ? `Deck: ${location.state?.deck.name}`
+              : "No deck loaded"}
           </Text>
         </CardHeader>
-        {deck ? (
+        {deck.length > 0 ? (
           <CardBody>
             <Table variant="simple" color="#fff">
               <Thead>
@@ -104,28 +137,16 @@ function Tables() {
                     Quantity
                   </Th>
                   <Th color="gray.400" borderBottomColor="#56577A">
-                    Type
+                    Set
                   </Th>
                   <Th color="gray.400" borderBottomColor="#56577A">
-                    Mana Cost
+                    EDHREC rank
                   </Th>
                   <Th color="gray.400" borderBottomColor="#56577A">
                     CMC
                   </Th>
                   <Th color="gray.400" borderBottomColor="#56577A">
-                    Oracle Text
-                  </Th>
-                  <Th color="gray.400" borderBottomColor="#56577A">
-                    Power
-                  </Th>
-                  <Th color="gray.400" borderBottomColor="#56577A">
-                    Toughness
-                  </Th>
-                  <Th color="gray.400" borderBottomColor="#56577A">
                     Colors
-                  </Th>
-                  <Th color="gray.400" borderBottomColor="#56577A">
-                    Set Name
                   </Th>
                   <Th color="gray.400" borderBottomColor="#56577A">
                     Rarity
@@ -133,18 +154,27 @@ function Tables() {
                 </Tr>
               </Thead>
               <Tbody>
-                {zones.map(zone => (
+                {zones.map((zone) => (
                   <React.Fragment key={zone}>
                     <Tr>
-                      <Td colSpan="11" style={{ fontWeight: 'bold', color: '#fff' }}>
+                      <Td
+                        colSpan="11"
+                        style={{ fontWeight: "bold", color: "#fff" }}
+                      >
                         <Flex align="center" justify="space-between">
                           {zone}
                           <IconButton
                             size="sm"
-                            icon={openZones[zone] ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                            icon={
+                              openZones[zone] ? (
+                                <ChevronUpIcon />
+                              ) : (
+                                <ChevronDownIcon />
+                              )
+                            }
                             onClick={() => toggleZone(zone)}
                             aria-label={`Toggle ${zone}`}
-                            backgroundColor={'#2D3748'}
+                            backgroundColor={"#2D3748"}
                             _hover={{ bg: "blue.800" }}
                             transition="background-color 0.2s ease-in-out"
                           />
@@ -157,13 +187,19 @@ function Tables() {
                           <Table variant="simple" color="#fff" width="100%">
                             <Tbody>
                               {cardsByZone[zone].map((card, index) => (
-                                <Tr key={index}>
+                                <Tr
+                                  key={index}
+                                  _hover={{ bg: "gray.700", cursor: "pointer" }}
+                                  onClick={() => handleRowClick(card)}
+                                >
                                   <Td>{card.name}</Td>
                                   <Td>
                                     <Flex align="center">
                                       <Button
                                         size="xs"
-                                        onClick={() => updateQuantity(card.id, card.zone, -1)}
+                                        onClick={() =>
+                                          updateQuantity(card.id, card.zone, -1)
+                                        }
                                         bg="teal.500"
                                         color="white"
                                         _hover={{ bg: "teal.600" }}
@@ -174,7 +210,9 @@ function Tables() {
                                       <Text mx="2">{card.quantity}</Text>
                                       <Button
                                         size="xs"
-                                        onClick={() => updateQuantity(card.id, card.zone, 1)}
+                                        onClick={() =>
+                                          updateQuantity(card.id, card.zone, 1)
+                                        }
                                         bg="teal.500"
                                         color="white"
                                         _hover={{ bg: "teal.600" }}
@@ -184,14 +222,12 @@ function Tables() {
                                       </Button>
                                     </Flex>
                                   </Td>
-                                  <Td>{card.typeLine}</Td>
-                                  <Td>{card.manaCost}</Td>
+                                  <Td>{card.set}</Td>
+                                  <Td>{card.edhrecRank}</Td>
                                   <Td>{card.cmc}</Td>
-                                  <Td>{card.oracleText}</Td>
-                                  <Td>{card.power}</Td>
-                                  <Td>{card.toughness}</Td>
-                                  <Td>{card.colors ? card.colors.join(", ") : ""}</Td>
-                                  <Td>{card.setName}</Td>
+                                  <Td>
+                                    {card.colorIdentity ? card.colorIdentity.join(", ") : ""}
+                                  </Td>
                                   <Td>{card.rarity}</Td>
                                 </Tr>
                               ))}
@@ -207,6 +243,23 @@ function Tables() {
           </CardBody>
         ) : null}
       </Card>
+
+      <Modal isOpen={isOpen} onClose={onClose} size="xl">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Card Images</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Carousel>
+              {selectedCardImages.map((image, index) => (
+                <div key={index}>
+                  <img src={image} alt={`Card face ${index + 1}`} />
+                </div>
+              ))}
+            </Carousel>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Flex>
   );
 }

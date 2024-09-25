@@ -11,7 +11,7 @@ export default function ExportMenu(props) {
   const exportDeck = async () => {
     const cachedDeck = localStorage.getItem("cachedDeck");
     if (cachedDeck) {
-      const deckInstance = MTGDeck.fromCachedDeck(cachedDeck);
+      const deckInstance = JSON.parse(cachedDeck);
       console.log("exporting deck:", deckInstance);
       await deckInstance.loadCardDetails();
       deckInstance.writeXML();
