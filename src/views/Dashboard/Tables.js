@@ -15,10 +15,10 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+// TODO: change to swiper.js 3d carousel
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import styled, { keyframes } from 'styled-components';
-import axios from 'axios';
 
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
@@ -116,9 +116,8 @@ function Tables() {
   const handleRowClick = async (card) => {
     const artPrintings = await getCardPrints(card);
     console.log(artPrintings);
-    console.log(artPrintings[card.name]);
-    if (artPrintings[card.name] && artPrintings[card.name].length > 0) {
-      setSelectedCardImages(artPrintings[card.name]);
+    if (artPrintings && artPrintings.length > 0) {
+      setSelectedCardImages(artPrintings);
       setIsCarouselOpen(true);
     } else {
       alert("No art printings found for this card.");

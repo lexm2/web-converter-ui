@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 class API {
   static async getCollection(client, identifiers) {
@@ -7,38 +7,45 @@ class API {
 
     const identifierChunks = chunk(identifiers, 75);
 
-    await Promise.all(identifierChunks.map(async (chunk) => {
-      const collectionRequest = { identifiers: chunk };
-      const response = await client.post('cards/collection?pretty=true', collectionRequest);
-      const result = response.data;
-      notFound.push(...result.not_found);
-      cards.push(...result.data);
-    }));
+    await Promise.all(
+      identifierChunks.map(async (chunk) => {
+        const collectionRequest = { identifiers: chunk };
+        const response = await client.post(
+          "cards/collection?pretty=true",
+          collectionRequest
+        );
+        const result = response.data;
+        notFound.push(...result.not_found);
+        cards.push(...result.data);
+      })
+    );
 
-    return { object: 'list', not_found: notFound, data: cards };
+    return { object: "list", not_found: notFound, data: cards };
   }
 
   static async getAllPrintings(client, printsSearchUri) {
     const response = await client.get(printsSearchUri);
 
-    console.log("responce data", response.data.data);
+    console.log("response data", response.data.data);
 
-    const artPrintings = {};
+    const artPrintings = [];
 
     for (const card of response.data.data) {
       const cardDetails = await client.get(card.uri);
-      console.log("card uri", card.uri);
+
       const cardFaces = cardDetails.data.card_faces || [];
-      artPrintings[card.name] = cardFaces.map(face => face.image_uris?.png).filter(uri => uri);
+      const imageUris = cardFaces
+        .map((face) => face.image_uris?.png)
+        .filter((uri) => uri);
+      console.log("imageUris", imageUris);
+
+      artPrintings.push(...imageUris);
     }
+    console.log("artPrintings", artPrintings);
     return artPrintings;
   }
 
   static async getAllArtPrintingsForDeck(deck) {
-
-
-    
-
     return artPrintings;
   }
 }
