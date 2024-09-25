@@ -138,9 +138,7 @@ function Tables() {
 
   const handleSelectCard = () => {
     if (selectedCard) {
-      console.log(
-        `Selected Card: Name - ${selectedCard.name}, ID - ${selectedCard.id}`
-      );
+      console.log("Selected card:", selectedCard);
       closeCarousel();
     }
   };

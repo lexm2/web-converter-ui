@@ -172,7 +172,7 @@ async function getCardPrints(card) {
   // Check if the card prints are already in the cache
   if (cardPrintsCache[card.id]) {
     console.log("Returning cached prints for card:", card.name);
-    return cardPrintsCache[card.id];
+    return cardPrintsCache[card.id].artPrintings;
   }
 
   const client = axios.create({
