@@ -15,6 +15,9 @@ const Zones = [
 let cachedCards = null;
 let cardsHash = null;
 
+// Cache for card prints
+const cardPrintsCache = {};
+
 class MTGCard {
   constructor(cardData, sectionName, quantity) {
     this.object = cardData.object;
@@ -166,6 +169,12 @@ class MTGDeck {
 }
 
 async function getCardPrints(card) {
+  // Check if the card prints are already in the cache
+  if (cardPrintsCache[card.id]) {
+    console.log("Returning cached prints for card:", card.name);
+    return cardPrintsCache[card.id];
+  }
+
   const client = axios.create({
     baseURL: "https://api.scryfall.com/",
     headers: {
@@ -174,7 +183,11 @@ async function getCardPrints(card) {
   });
 
   const response = await API.getAllPrintings(client, card.printsSearchUri);
-  return response;
+
+  // Store the response in the cache
+  cardPrintsCache[card.id] = response;
+
+  return response.artPrintings;
 }
 
 function hashDeck(deck) {

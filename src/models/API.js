@@ -29,20 +29,30 @@ class API {
     console.log("response data", response.data.data);
 
     const artPrintings = [];
+    const cardImageID = [];
 
     for (const card of response.data.data) {
       const cardDetails = await client.get(card.uri);
 
       const cardFaces = cardDetails.data.card_faces || [];
-      const imageUris = cardFaces
-        .map((face) => face.image_uris?.png)
-        .filter((uri) => uri);
-      console.log("imageUris", imageUris);
+      if (cardFaces.length > 0) {
+        const imageUris = cardFaces
+          .map((face) => face.image_uris?.png)
+          .filter((uri) => uri);
+        console.log("imageUris from card_faces", imageUris);
+        artPrintings.push(...imageUris);
+      } else if (cardDetails.data.image_uris) {
+        const imageUri = cardDetails.data.image_uris.png;
+        console.log("imageUri from cardDetails.data", imageUri);
+        if (imageUri) {
+          artPrintings.push(imageUri);
+        }
+      }
 
-      artPrintings.push(...imageUris);
+      cardImageID.push(card.id);
     }
     console.log("artPrintings", artPrintings);
-    return artPrintings;
+    return { artPrintings, cardImageID };
   }
 
   static async getAllArtPrintingsForDeck(deck) {
