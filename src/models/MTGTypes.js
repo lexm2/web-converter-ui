@@ -128,7 +128,7 @@ class MTGDeck {
     });
 
     const identifiers = this.cards.map((card) => {
-      const cardName = card.name.includes(" // ")
+      let cardName = card.name.includes(" // ")
         ? card.name.split(" // ")[0]
         : card.name;
 
@@ -139,7 +139,6 @@ class MTGDeck {
     });
 
     const collection = await API.getCollection(client, identifiers);
-    console.log(collection);
     this.cards = collection.data
       .map((cardData) => {
         const existingCard = this.cards.find(
@@ -162,7 +161,6 @@ class MTGDeck {
 
     // Assign the cache only after the request is done
     localStorage.setItem("cachedDeck", JSON.stringify(this.cards));
-    console.log(JSON.parse(localStorage.getItem("cachedDeck")));
     cachedCards = this.cards;
     return this.cards;
   }
@@ -188,6 +186,17 @@ async function getCardPrints(card) {
   cardPrintsCache[card.id] = response;
 
   return response.artPrintings;
+}
+
+function getPrintData(cardID, index) {
+  const print = cardPrintsCache[cardID];
+  if (print.cardData.length < print.artPrintings.length) {
+    console.log("dualsided");
+    index = Math.floor(index / 2);
+  }
+  console.log("new card data", print.cardData);
+
+  return print.cardData[index];
 }
 
 function hashDeck(deck) {
@@ -372,4 +381,5 @@ export {
   parseDeckList,
   writeXML,
   getCardPrints,
+  getPrintData,
 };

@@ -23,13 +23,7 @@ import styled, { keyframes } from "styled-components";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
-import {
-  MTGDeck,
-  MTGCard,
-  importDeckList,
-  writeXML,
-  getCardPrints,
-} from "models/MTGTypes.js"; // Import MTGDeck, MTGCard, importDeckList, and writeXML
+import { getCardPrints, getPrintData } from "models/MTGTypes.js"; // Import MTGDeck, MTGCard, importDeckList, and writeXML
 
 const fadeIn = keyframes`
   from {
@@ -62,6 +56,9 @@ const CarouselContainer = styled.div`
   border-radius: 10px;
   overflow: hidden;
 `;
+
+// Global variable to store the carousel index
+let globalCarouselIndex = 0;
 
 function Tables() {
   const [deck, setDeck] = useState([]);
@@ -126,6 +123,7 @@ function Tables() {
     if (artPrintings && artPrintings.length > 0) {
       setSelectedCardImages(artPrintings);
       setSelectedCard(card);
+      globalCarouselIndex = 0;
       setIsCarouselOpen(true);
     } else {
       alert("No art printings found for this card.");
@@ -138,7 +136,17 @@ function Tables() {
 
   const handleSelectCard = () => {
     if (selectedCard) {
-      console.log("Selected card:", selectedCard);
+      const cardIndex = deck.findIndex(
+        (card) => card.oracleId === selectedCard.oracleId
+      );
+      if (cardIndex === -1) {
+        console.log(`Card with ID ${cardId} not found in the deck.`);
+        return;
+      }
+      const newCard = getPrintData(selectedCard.id, globalCarouselIndex)
+      Object.assign(deck[cardIndex], newCard);
+      localStorage.setItem("cachedDeck", JSON.stringify(deck));
+
       closeCarousel();
     }
   };
@@ -316,6 +324,9 @@ function Tables() {
               dynamicHeight
               centerMode
               centerSlidePercentage={80}
+              onChange={(index) => {
+                globalCarouselIndex = index; // Update the global carousel index
+              }}
             >
               {selectedCardImages.map((image, index) => (
                 <div key={index}>

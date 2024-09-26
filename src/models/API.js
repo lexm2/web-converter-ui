@@ -26,10 +26,9 @@ class API {
   static async getAllPrintings(client, printsSearchUri) {
     const response = await client.get(printsSearchUri);
 
-    console.log("response data", response.data.data);
 
     const artPrintings = [];
-    const cardImageID = [];
+    const cardData = [];
 
     for (const card of response.data.data) {
       const cardDetails = await client.get(card.uri);
@@ -39,20 +38,17 @@ class API {
         const imageUris = cardFaces
           .map((face) => face.image_uris?.png)
           .filter((uri) => uri);
-        console.log("imageUris from card_faces", imageUris);
         artPrintings.push(...imageUris);
       } else if (cardDetails.data.image_uris) {
         const imageUri = cardDetails.data.image_uris.png;
-        console.log("imageUri from cardDetails.data", imageUri);
         if (imageUri) {
           artPrintings.push(imageUri);
         }
       }
 
-      cardImageID.push(card.id);
+      cardData.push(card);
     }
-    console.log("artPrintings", artPrintings);
-    return { artPrintings, cardImageID };
+    return { artPrintings, cardData };
   }
 
   static async getAllArtPrintingsForDeck(deck) {
