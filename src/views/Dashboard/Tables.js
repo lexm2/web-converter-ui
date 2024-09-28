@@ -183,60 +183,6 @@ function Tables() {
         {deck.length > 0 ? (
           <CardBody>
             <Table variant="simple" color="#fff">
-              <Thead>
-                <Tr my=".8rem" ps="0px">
-                  <Th
-                    ps="0px"
-                    color="gray.400"
-                    fontFamily="Plus Jakarta Display"
-                    borderBottomColor="#56577A"
-                  >
-                    Card Name 
-                  </Th>
-                  <Th
-                    color="gray.400"
-                    fontFamily="Plus Jakarta Display"
-                    borderBottomColor="#56577A"
-                  >
-                    Quantity
-                  </Th>
-                  <Th
-                    color="gray.400"
-                    fontFamily="Plus Jakarta Display"
-                    borderBottomColor="#56577A"
-                  >
-                    Set
-                  </Th>
-                  <Th
-                    color="gray.400"
-                    fontFamily="Plus Jakarta Display"
-                    borderBottomColor="#56577A"
-                  >
-                    EDHREC rank
-                  </Th>
-                  <Th
-                    color="gray.400"
-                    fontFamily="Plus Jakarta Display"
-                    borderBottomColor="#56577A"
-                  >
-                    CMC
-                  </Th>
-                  <Th
-                    color="gray.400"
-                    fontFamily="Plus Jakarta Display"
-                    borderBottomColor="#56577A"
-                  >
-                    Colors
-                  </Th>
-                  <Th
-                    color="gray.400"
-                    fontFamily="Plus Jakarta Display"
-                    borderBottomColor="#56577A"
-                  >
-                    Rarity
-                  </Th>
-                </Tr>
-              </Thead>
               <Tbody>
                 {zones.map((zone) => (
                   <React.Fragment key={zone}>
@@ -269,6 +215,60 @@ function Tables() {
                       <Td colSpan="11" p={0}>
                         <Collapse in={openZones[zone]} animateOpacity>
                           <Table variant="simple" color="#fff" width="100%">
+                            <Thead>
+                              <Tr my=".8rem" ps="0px">
+                                <Th
+                                  ps="0px"
+                                  color="gray.400"
+                                  fontFamily="Plus Jakarta Display"
+                                  borderBottomColor="#56577A"
+                                >
+                                  Card Name
+                                </Th>
+                                <Th
+                                  color="gray.400"
+                                  fontFamily="Plus Jakarta Display"
+                                  borderBottomColor="#56577A"
+                                >
+                                  Quantity
+                                </Th>
+                                <Th
+                                  color="gray.400"
+                                  fontFamily="Plus Jakarta Display"
+                                  borderBottomColor="#56577A"
+                                >
+                                  Set
+                                </Th>
+                                <Th
+                                  color="gray.400"
+                                  fontFamily="Plus Jakarta Display"
+                                  borderBottomColor="#56577A"
+                                >
+                                  EDHREC rank
+                                </Th>
+                                <Th
+                                  color="gray.400"
+                                  fontFamily="Plus Jakarta Display"
+                                  borderBottomColor="#56577A"
+                                >
+                                  CMC
+                                </Th>
+                                <Th
+                                  color="gray.400"
+                                  fontFamily="Plus Jakarta Display"
+                                  borderBottomColor="#56577A"
+                                >
+                                  Colors
+                                </Th>
+                                <Th
+                                  color="gray.400"
+                                  fontFamily="Plus Jakarta Display"
+                                  borderBottomColor="#56577A"
+                                >
+                                  Rarity
+                                </Th>
+                              </Tr>
+                            </Thead>
                             <Tbody>
                               {cardsByZone[zone].map((card, index) => (
                                 <Tr
