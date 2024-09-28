@@ -31,6 +31,7 @@ function Tables() {
   const [deck, setDeck] = useState([]);
   const location = useLocation();
   const [loading, setLoading] = useState(true);
+  const [loadingPrints, setLoadingPrints] = useState(false);
   const [openZones, setOpenZones] = useState({
     Main: true,
     Sideboard: true,
@@ -77,7 +78,6 @@ function Tables() {
       JSON.stringify({ ...cachedDeck, cards: updatedDeck })
     );
   };
-  
 
   const toggleZone = (zone) => {
     setOpenZones((prevState) => ({
@@ -87,7 +87,9 @@ function Tables() {
   };
 
   const handleRowClick = async (card) => {
+    setLoadingPrints(true);
     const artPrintings = await getCardPrints(card);
+    setLoadingPrints(false);
     console.log(artPrintings);
     if (artPrintings && artPrintings.length > 0) {
       setSelectedCardImages(artPrintings);
@@ -337,6 +339,22 @@ function Tables() {
           </CardBody>
         ) : null}
       </Card>
+
+      {loadingPrints && (
+        <Flex
+          justify="center"
+          align="center"
+          position="fixed"
+          top="0"
+          left="0"
+          right="0"
+          bottom="0"
+          bg="rgba(0, 0, 0, 0.5)"
+          zIndex="9999"
+        >
+          <Spinner size="xl" color="teal.500" thickness="4px" speed="0.65s" />
+        </Flex>
+      )}
 
       {isCarouselOpen && (
         <Carousel

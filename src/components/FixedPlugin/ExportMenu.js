@@ -13,14 +13,8 @@ export default function ExportMenu(props) {
     const cachedDeck = localStorage.getItem("cachedDeck");
     if (cachedDeck) {
       const deckData = JSON.parse(cachedDeck);
-      const deckInstance = new MTGDeck(deckData.name);
       console.log("deck data", deckData);
-      deckData.forEach(cardData => {
-        const card = new MTGCard(cardData, cardData.zone, cardData.quantity);
-        deckInstance.addCard(card, cardData.quantity);
-      });
-      console.log("exporting deck:", deckInstance);
-      await writeXML(deckInstance);
+      await writeXML(deckData);
     } else {
       alert("No deck found to export.");
     }
