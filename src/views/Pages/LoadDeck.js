@@ -10,6 +10,7 @@ import {
   Heading,
   Input,
   Text,
+  Textarea,
 } from "@chakra-ui/react";
 import signInImage from "assets/img/signInImage.png";
 import AuthFooter from "components/Footer/AuthFooter";
@@ -134,7 +135,7 @@ function LoadDeck() {
                 w={{ base: "100%", lg: "fit-content" }}
                 borderRadius="20px"
               >
-                <Input
+                <Textarea
                   ref={decklistInputRef}
                   color="white"
                   bg="rgb(19,21,54)"
@@ -146,6 +147,17 @@ function LoadDeck() {
                   maxW="100%"
                   h="20rem"
                   placeholder="Paste decklist here"
+                  resize="vertical"
+                  whiteSpace="pre-wrap"
+                  overflowWrap="break-word"
+                  pt="15px" // Add top padding
+                  pl="15px" // Add left padding
+                  sx={{
+                    "&::placeholder": {
+                      top: "15px", // Adjust placeholder position
+                      left: "15px", // Adjust placeholder position
+                    },
+                  }}
                 />
               </GradientBorder>
             </FormControl>

@@ -12,9 +12,9 @@ export default function ExportMenu(props) {
   const exportDeck = async () => {
     const cachedDeck = localStorage.getItem("cachedDeck");
     if (cachedDeck) {
-      const deckData = JSON.parse(cachedDeck);
-      console.log("deck data", deckData);
-      await writeXML(deckData);
+      const cards = JSON.parse(cachedDeck);
+      console.log("deck data", cards);
+      await writeXML({ cards });
     } else {
       alert("No deck found to export.");
     }

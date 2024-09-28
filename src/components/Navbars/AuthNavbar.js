@@ -13,7 +13,7 @@ import PropTypes from "prop-types";
 import React from "react";
 import { NavLink } from "react-router-dom";
 import routes from "routes.js";
-import { MTGDeck } from "models/MTGTypes";
+import { MTGDeck, importDeckList, writeXML } from "models/MTGTypes";
 
 export default function AuthNavbar(props) {
   const [open, setOpen] = React.useState(false);
@@ -44,13 +44,13 @@ export default function AuthNavbar(props) {
     fileInput.onchange = (e) => {
       const file = e.target.files[0];
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
         const deckListString = event.target.result;
         const deck = new MTGDeck("Imported Deck");
-        deck.importDeckList(deckListString);
-        deck.writeXML();
-      };
-      reader.readAsText(file);
+        const cards = await importDeckList(deckListString);
+        deck.cards = cards;
+        writeXML(deck);
+      };      reader.readAsText(file);
     };
     fileInput.click();
   };

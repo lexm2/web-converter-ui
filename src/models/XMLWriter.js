@@ -89,7 +89,7 @@ function XMLWriter(encoding, version) {
         ];
 
       if (this.standalone !== undefined)
-        buffer[0] += ' standalone="' + !!this.standalone + '"';
+        buffer[0] += ' standalone="yes"';
 
       buffer[0] += " ?>";
 

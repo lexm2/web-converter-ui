@@ -358,9 +358,9 @@ async function writeXML(deck) {
     const userFilename = prompt("Enter a filename:", defaultFilename);
     if (!userFilename) return; // User cancelled the prompt
 
-    const filename = userFilename.endsWith(".od8")
+    const filename = userFilename.endsWith(".o8d")
       ? userFilename
-      : `${userFilename}.od8`;
+      : `${userFilename}.o8d`;
     const blob = new Blob([stringData], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
 
@@ -371,7 +371,7 @@ async function writeXML(deck) {
     URL.revokeObjectURL(url);
   }
 
-  downloadStringAsFile(xml, `${deck.name}.od8`);
+  downloadStringAsFile(xml, `${deck.name}.o8d`);
 }
 
 export {
