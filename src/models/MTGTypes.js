@@ -2,6 +2,7 @@ import axios from "axios";
 import API from "./API";
 import XMLWriter from "./XMLWriter";
 import CryptoJS from "crypto-js";
+import { saveAs } from "file-saver";
 
 const Zones = [
   "Main",
@@ -153,7 +154,6 @@ class MTGDeck {
           card.quantity = existingCard.quantity;
           return card;
         } else {
-
           console.log(`Card not found: ${cardData.name}`);
           return null;
         }
@@ -304,7 +304,7 @@ function parseDeckList(deckListString) {
 
   return cards;
 }
-  
+
 async function writeXML(deck) {
   const xw = new XMLWriter("UTF-8", "1.0");
   xw.formatting = "indented";
@@ -361,14 +361,9 @@ async function writeXML(deck) {
     const filename = userFilename.endsWith(".o8d")
       ? userFilename
       : `${userFilename}.o8d`;
-    const blob = new Blob([stringData], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
+    const blob = new Blob([stringData], { type: "text/plain;charset=utf-8" });
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(url);
+    saveAs(blob, filename);
   }
 
   downloadStringAsFile(xml, `${deck.name}.o8d`);
