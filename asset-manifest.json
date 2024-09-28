@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/vision-ui-dashboard-chakra/static/css/main.566ac412.css",
+    "main.js": "/vision-ui-dashboard-chakra/static/js/main.273f466f.js",
+    "static/media/background-body-admin.png": "/vision-ui-dashboard-chakra/static/media/background-body-admin.9a5703c114bec6efe39b.png",
+    "static/media/signInImage.png": "/vision-ui-dashboard-chakra/static/media/signInImage.54090d1d6f00462e1f4b.png",
+    "index.html": "/vision-ui-dashboard-chakra/index.html",
+    "main.566ac412.css.map": "/vision-ui-dashboard-chakra/static/css/main.566ac412.css.map",
+    "main.273f466f.js.map": "/vision-ui-dashboard-chakra/static/js/main.273f466f.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.566ac412.css",
+    "static/js/main.273f466f.js"
+  ]
+}
