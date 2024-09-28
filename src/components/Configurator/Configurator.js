@@ -64,10 +64,10 @@ export default function Configurator(props) {
           <DrawerHeader pt='24px' px='24px'>
             <DrawerCloseButton color='white' />
             <Text color='white' fontSize='xl' fontWeight='bold' mt='16px'>
-              Vision UI Configurator
+              Settings
             </Text>
             <Text color='white' fontSize='md' mb='16px'>
-              See your dashboard options.
+              Implement later
             </Text>
             <Separator />
           </DrawerHeader>
@@ -96,7 +96,7 @@ export default function Configurator(props) {
                   />
                 </DarkMode>
               </Box>
-              <Box>
+              {/* <Box>
                 <Box>
                   <Link
                     href='https://www.creative-tim.com/product/vision-ui-dashboard-chakra'
@@ -140,35 +140,7 @@ export default function Configurator(props) {
                     Star
                   </GitHubButton>
                 </Flex>
-                <Box w='100%'>
-                  <Text color='white' mb='6px' textAlign='center'>
-                    Thank you for sharing!
-                  </Text>
-                  <LightMode>
-                    <Flex justifyContent='center' alignContent='center'>
-                      <Link
-                        isExternal='true'
-                        href='https://twitter.com/intent/tweet?url=https%3A%2F%2Fwww.creative-tim.com%2Fproduct%2Fvision-ui-dashboard-chakra&text=Check%20vision%20UI%20Dashboard%20made%20by%20%40CreativeTim%20and%20%40simmmple_web%20%23webdesign%20%23dashboard%20%23chakra'>
-                        <Button
-                          colorScheme='twitter'
-                          leftIcon={<FaTwitter />}
-                          me='10px'>
-                          <Text>Tweet</Text>
-                        </Button>
-                      </Link>
-                      <Link
-                        isExternal='true'
-                        href='https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fwww.creative-tim.com%2Fproduct%2Fvision-ui-dashboard-chakra'>
-                        <Button
-                          colorScheme='facebook'
-                          leftIcon={<FaFacebook />}>
-                          <Text>Share</Text>
-                        </Button>
-                      </Link>
-                    </Flex>
-                  </LightMode>
-                </Box>
-              </Box>
+              </Box> */}
             </Flex>
           </DrawerBody>
         </DrawerContent>

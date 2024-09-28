@@ -81,34 +81,10 @@ export default function HeaderLinks(props) {
           fontSize='xs'
           py='11px'
           color={mainText}
-          placeholder='Type here...'
+          placeholder='Doesnt work yet'
           borderRadius='inherit'
         />
       </InputGroup>
-      <NavLink to='/auth/signin'>
-        <Button
-          ms='0px'
-          px='0px'
-          me={{ sm: "2px", md: "16px" }}
-          color={navbarIcon}
-          variant='transparent-with-icon'
-          rightIcon={
-            document.documentElement.dir ? (
-              ""
-            ) : (
-              <ProfileIcon color={navbarIcon} w='22px' h='22px' me='0px' />
-            )
-          }
-          leftIcon={
-            document.documentElement.dir ? (
-              <ProfileIcon color={navbarIcon} w='22px' h='22px' me='0px' />
-            ) : (
-              ""
-            )
-          }>
-          <Text display={{ sm: "none", md: "flex" }}>Sign In</Text>
-        </Button>
-      </NavLink>
       <SidebarResponsive
         iconColor='gray.500'
         logoText={props.logoText}
@@ -127,7 +103,7 @@ export default function HeaderLinks(props) {
         w='18px'
         h='18px'
       />
-      <Menu>
+      {/* <Menu>
         <MenuButton align='center'>
           <BellIcon color={navbarIcon} mt='-4px' w='18px' h='18px' />
         </MenuButton>
@@ -197,7 +173,7 @@ export default function HeaderLinks(props) {
             </MenuItem>
           </Flex>
         </MenuList>
-      </Menu>
+      </Menu> */}
     </Flex>
   );
 }
