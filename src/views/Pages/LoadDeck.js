@@ -145,7 +145,7 @@ function LoadDeck() {
                   size="lg"
                   w={{ base: "100%", md: "346px" }}
                   maxW="100%"
-                  h="20rem"
+                  h="10rem"
                   placeholder="Paste decklist here"
                   resize="vertical"
                   whiteSpace="pre-wrap"
