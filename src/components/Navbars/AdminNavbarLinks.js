@@ -160,9 +160,6 @@ export default function HeaderLinks(props) {
             </MenuItem>
             <MenuItem
               borderRadius='8px'
-              _hover={{
-                bg: "transparent",
-              }}
               _active={{
                 bg: "transparent",
               }}

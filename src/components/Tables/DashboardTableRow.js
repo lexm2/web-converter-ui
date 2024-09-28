@@ -48,13 +48,13 @@ function DashboardTableRow(props) {
       </Td>
 
       <Td borderBottomColor='#56577A' border={lastItem ? "none" : null}>
-        <AvatarGroup size='xs' showBorder={false}>
+        <AvatarGroup size='xs' showborder={false}>
           {members.map((member) => {
             return (
               <Avatar
                 name='Ryan Florence'
                 src={member}
-                showBorder={false}
+                showborder={false}
                 border='none'
                 _hover={{ zIndex: "3", cursor: "pointer" }}
               />
@@ -75,7 +75,7 @@ function DashboardTableRow(props) {
             fontWeight='bold'
             pb='.2rem'>{`${progression}%`}</Text>
           <Progress
-            colorScheme='brand'
+            colorscheme='brand'
             h='3px'
             bg='#2D2E5F'
             value={progression}

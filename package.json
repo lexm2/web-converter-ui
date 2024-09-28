@@ -31,14 +31,14 @@
     "react-icons": "^4.2.0",
     "react-jvectormap": "0.0.16",
     "react-leaflet-semicircle": "^3.0.3",
-    "react-responsive-carousel": "^3.2.23",
     "react-router-dom": "^5.2.0",
     "react-scripts": "5.0.0",
     "react-swipeable-views": "0.14.0",
     "react-table": "7.7.0",
     "styled-components": "^6.1.13",
     "stylis": "^4.0.10",
-    "stylis-plugin-rtl": "^2.1.0"
+    "stylis-plugin-rtl": "^2.1.0",
+    "swiper": "^11.1.14"
   },
   "resolutions": {
     "react-error-overlay": "6.0.9"

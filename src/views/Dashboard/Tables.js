@@ -15,47 +15,12 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
-// TODO: change to swiper.js 3d carousel
-import { Carousel } from "react-responsive-carousel";
-import "react-responsive-carousel/lib/styles/carousel.min.css";
-import styled, { keyframes } from "styled-components";
 
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
-import { getCardPrints, getPrintData } from "models/MTGTypes.js"; // Import MTGDeck, MTGCard, importDeckList, and writeXML
-
-const fadeIn = keyframes`
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-`;
-
-const BlurBackground = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  backdrop-filter: blur(10px);
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  animation: ${fadeIn} 0.3s ease-in-out;
-  z-index: 1000;
-`;
-
-const CarouselContainer = styled.div`
-  width: 80%;
-  max-width: 800px;
-  background: white;
-  border-radius: 10px;
-  overflow: hidden;
-`;
+import { getCardPrints, getPrintData } from "models/MTGTypes.js";
+import Carousel from "./Carousel"; // Import the new Carousel component
 
 // Global variable to store the carousel index
 let globalCarouselIndex = 0;
@@ -143,7 +108,7 @@ function Tables() {
         console.log(`Card with ID ${cardId} not found in the deck.`);
         return;
       }
-      const newCard = getPrintData(selectedCard.id, globalCarouselIndex)
+      const newCard = getPrintData(selectedCard.id, globalCarouselIndex);
       Object.assign(deck[cardIndex], newCard);
       localStorage.setItem("cachedDeck", JSON.stringify(deck));
 
@@ -313,38 +278,12 @@ function Tables() {
       </Card>
 
       {isCarouselOpen && (
-        <BlurBackground onClick={closeCarousel}>
-          <CarouselContainer onClick={(e) => e.stopPropagation()}>
-            <Carousel
-              showThumbs={false}
-              showStatus={false}
-              infiniteLoop
-              useKeyboardArrows
-              emulateTouch
-              dynamicHeight
-              centerMode
-              centerSlidePercentage={80}
-              onChange={(index) => {
-                globalCarouselIndex = index; // Update the global carousel index
-              }}
-            >
-              {selectedCardImages.map((image, index) => (
-                <div key={index}>
-                  <img src={image} alt={`Card face ${index + 1}`} />
-                </div>
-              ))}
-            </Carousel>
-            <Button
-              mt={4}
-              colorScheme="teal"
-              onClick={handleSelectCard}
-              display="block"
-              mx="auto"
-            >
-              Select Card
-            </Button>
-          </CarouselContainer>
-        </BlurBackground>
+        <Carousel
+          selectedCardImages={selectedCardImages}
+          handleSelectCard={handleSelectCard}
+          closeCarousel={closeCarousel}
+          globalCarouselIndex={globalCarouselIndex}
+        />
       )}
     </Flex>
   );
