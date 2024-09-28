@@ -71,11 +71,13 @@ function Tables() {
       return card;
     });
     setDeck(updatedDeck);
+    const cachedDeck = JSON.parse(localStorage.getItem("cachedDeck")) || {};
     localStorage.setItem(
       "cachedDeck",
-      JSON.stringify({ ...location.state.deck, cards: updatedDeck })
+      JSON.stringify({ ...cachedDeck, cards: updatedDeck })
     );
   };
+  
 
   const toggleZone = (zone) => {
     setOpenZones((prevState) => ({

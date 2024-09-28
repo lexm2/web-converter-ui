@@ -303,7 +303,7 @@ function parseDeckList(deckListString) {
 
   return cards;
 }
-
+  
 async function writeXML(deck) {
   const xw = new XMLWriter("UTF-8", "1.0");
   xw.formatting = "indented";

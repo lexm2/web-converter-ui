@@ -1,7 +1,8 @@
 import { Button, useColorModeValue } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import React from "react";
-import { MTGDeck } from "models/MTGTypes.js"; // Import MTGDeck
+import { FiDownload } from "react-icons/fi"; // Import the download icon
+import { MTGDeck, MTGCard, writeXML } from "models/MTGTypes.js"; // Import MTGDeck and writeXML
 
 export default function ExportMenu(props) {
   const { secondary, onChange, onSwitch, fixed, ...rest } = props;
@@ -11,10 +12,14 @@ export default function ExportMenu(props) {
   const exportDeck = async () => {
     const cachedDeck = localStorage.getItem("cachedDeck");
     if (cachedDeck) {
-      const deckInstance = JSON.parse(cachedDeck);
+      const deckData = JSON.parse(cachedDeck);
+      const deckInstance = new MTGDeck(deckData.name);
+      deckData.cards.forEach(cardData => {
+        const card = new MTGCard(cardData, cardData.zone, cardData.quantity);
+        deckInstance.addCard(card, cardData.quantity);
+      });
       console.log("exporting deck:", deckInstance);
-      await deckInstance.loadCardDetails();
-      deckInstance.writeXML();
+      await writeXML(deckInstance);
     } else {
       alert("No deck found to export.");
     }
@@ -34,7 +39,7 @@ export default function ExportMenu(props) {
       borderRadius="50px"
       boxShadow="0 2px 12px 0 rgb(0 0 0 / 16%)"
     >
-      Export
+      <FiDownload size="24px" color={navbarIcon} /> {/* Use the icon here */}
     </Button>
   );
 }
