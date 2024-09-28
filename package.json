@@ -2,7 +2,7 @@
   "name": "vision-ui-dashboard-chakra",
   "version": "1.0.1",
   "private": true,
-  "homepage": "https://demos.creative-tim.com/vision-ui-dashboard-chakra/#/",
+  "homepage": "https://lexm2.github.io/web-converter-ui/",
   "dependencies": {
     "@chakra-ui/icons": "^1.1.5",
     "@chakra-ui/react": "1.8.8",
