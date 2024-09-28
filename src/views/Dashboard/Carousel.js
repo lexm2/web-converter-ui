@@ -43,6 +43,7 @@ const Carousel = ({
   handleSelectCard,
   closeCarousel,
   globalCarouselIndex,
+  updateCarouselIndex,
 }) => {
   return (
     <BlurBackground onClick={closeCarousel}>
@@ -63,7 +64,7 @@ const Carousel = ({
           pagination={{ clickable: true }}
           modules={[EffectCoverflow, Navigation, Pagination]}
           onSlideChange={(swiper) => {
-            globalCarouselIndex = swiper.activeIndex;
+            updateCarouselIndex(swiper.activeIndex);
           }}
         >
           {selectedCardImages.map((image, index) => (

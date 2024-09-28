@@ -190,11 +190,10 @@ async function getCardPrints(card) {
 
 function getPrintData(cardID, index) {
   const print = cardPrintsCache[cardID];
-  if (print.cardData.length < print.artPrintings.length) {
+  if (print.dualsided) {
     console.log("dualsided");
     index = Math.floor(index / 2);
   }
-  console.log("new card data", print.cardData);
 
   return print.cardData[index];
 }

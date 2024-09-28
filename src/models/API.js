@@ -29,8 +29,13 @@ class API {
 
     const artPrintings = [];
     const cardData = [];
+    let dualsided = false;
 
     for (const card of response.data.data) {
+      if (card.layout === "transform" || card.layout === "modal_dfc") {
+        dualsided = true;
+      }
+
       const cardDetails = await client.get(card.uri);
 
       const cardFaces = cardDetails.data.card_faces || [];
@@ -48,7 +53,7 @@ class API {
 
       cardData.push(card);
     }
-    return { artPrintings, cardData };
+    return { artPrintings, cardData, dualsided };
   }
 
   static async getAllArtPrintingsForDeck(deck) {

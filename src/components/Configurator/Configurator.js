@@ -176,9 +176,10 @@ export default function Configurator(props) {
     </>
   );
 }
+
 Configurator.propTypes = {
   secondary: PropTypes.bool,
-  isOpen: PropTypes.func,
+  isOpen: PropTypes.bool, // Changed from func to bool
   onClose: PropTypes.func,
   fixed: PropTypes.bool,
 };

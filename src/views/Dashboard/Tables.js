@@ -13,8 +13,10 @@ import {
   Button,
   Collapse,
   IconButton,
+  Icon,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { IoCheckmarkDoneCircleSharp } from "react-icons/io5";
 
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
@@ -108,12 +110,23 @@ function Tables() {
         console.log(`Card with ID ${cardId} not found in the deck.`);
         return;
       }
+      console.log(globalCarouselIndex);
       const newCard = getPrintData(selectedCard.id, globalCarouselIndex);
       Object.assign(deck[cardIndex], newCard);
       localStorage.setItem("cachedDeck", JSON.stringify(deck));
 
       closeCarousel();
     }
+  };
+
+  const updateCarouselIndex = (index) => {
+    globalCarouselIndex = index;
+  };
+
+  const getTotalMainZoneCards = () => {
+    return deck
+      .filter((card) => card.zone === "Main")
+      .reduce((total, card) => total + card.quantity, 0);
   };
 
   if (loading) {
@@ -142,38 +155,84 @@ function Tables() {
 
   return (
     <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
-      <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
-        <CardHeader p="6px 0px 22px 0px">
-          <Text fontSize="lg" color="#fff" fontWeight="bold">
-            {deck.length > 0
-              ? `Deck: ${location.state?.deck.name}`
-              : "No deck loaded"}
-          </Text>
+      <Card p="16px" overflowX={{ sm: "scroll", xl: "hidden" }}>
+        <CardHeader p="12px 0px 28px 0px">
+          <Flex direction="column">
+            <Text fontSize="lg" color="#fff" fontWeight="bold" pb="8px">
+              {deck.length > 0
+                ? `Deck: ${location.state?.deck.name}`
+                : "No deck loaded"}
+            </Text>
+            <Flex align="center">
+              <Icon
+                as={IoCheckmarkDoneCircleSharp}
+                color="teal.300"
+                w={4}
+                h={4}
+                pe="3px"
+              />
+              <Text fontSize="sm" color="gray.400" fontWeight="normal">
+                <Text fontWeight="bold" as="span">
+                  {getTotalMainZoneCards()} cards
+                </Text>{" "}
+                in this deck.
+              </Text>
+            </Flex>
+          </Flex>
         </CardHeader>
         {deck.length > 0 ? (
           <CardBody>
             <Table variant="simple" color="#fff">
               <Thead>
-                <Tr my=".8rem" ps="0px" color="gray.400">
-                  <Th color="gray.400" borderBottomColor="#56577A">
-                    Card Name
+                <Tr my=".8rem" ps="0px">
+                  <Th
+                    ps="0px"
+                    color="gray.400"
+                    fontFamily="Plus Jakarta Display"
+                    borderBottomColor="#56577A"
+                  >
+                    Card Name 
                   </Th>
-                  <Th color="gray.400" borderBottomColor="#56577A">
+                  <Th
+                    color="gray.400"
+                    fontFamily="Plus Jakarta Display"
+                    borderBottomColor="#56577A"
+                  >
                     Quantity
                   </Th>
-                  <Th color="gray.400" borderBottomColor="#56577A">
+                  <Th
+                    color="gray.400"
+                    fontFamily="Plus Jakarta Display"
+                    borderBottomColor="#56577A"
+                  >
                     Set
                   </Th>
-                  <Th color="gray.400" borderBottomColor="#56577A">
+                  <Th
+                    color="gray.400"
+                    fontFamily="Plus Jakarta Display"
+                    borderBottomColor="#56577A"
+                  >
                     EDHREC rank
                   </Th>
-                  <Th color="gray.400" borderBottomColor="#56577A">
+                  <Th
+                    color="gray.400"
+                    fontFamily="Plus Jakarta Display"
+                    borderBottomColor="#56577A"
+                  >
                     CMC
                   </Th>
-                  <Th color="gray.400" borderBottomColor="#56577A">
+                  <Th
+                    color="gray.400"
+                    fontFamily="Plus Jakarta Display"
+                    borderBottomColor="#56577A"
+                  >
                     Colors
                   </Th>
-                  <Th color="gray.400" borderBottomColor="#56577A">
+                  <Th
+                    color="gray.400"
+                    fontFamily="Plus Jakarta Display"
+                    borderBottomColor="#56577A"
+                  >
                     Rarity
                   </Th>
                 </Tr>
@@ -283,6 +342,7 @@ function Tables() {
           handleSelectCard={handleSelectCard}
           closeCarousel={closeCarousel}
           globalCarouselIndex={globalCarouselIndex}
+          updateCarouselIndex={updateCarouselIndex}
         />
       )}
     </Flex>
