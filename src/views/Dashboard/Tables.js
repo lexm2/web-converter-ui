@@ -64,19 +64,19 @@ function Tables() {
     loadDeck();
   }, [location]);
 
+  useEffect(() => {
+    localStorage.setItem("cachedDeck", JSON.stringify(deck));
+  }, [deck]);
+
   const updateQuantity = (cardId, zone, delta) => {
     const updatedDeck = deck.map((card) => {
       if (card.id === cardId && card.zone === zone) {
+        console.log("Deck updated:", card.quantity + delta);
         return { ...card, quantity: Math.max(1, card.quantity + delta) };
       }
       return card;
     });
     setDeck(updatedDeck);
-    const cachedDeck = JSON.parse(localStorage.getItem("cachedDeck")) || {};
-    localStorage.setItem(
-      "cachedDeck",
-      JSON.stringify({ ...cachedDeck, cards: updatedDeck })
-    );
   };
 
   const toggleZone = (zone) => {
