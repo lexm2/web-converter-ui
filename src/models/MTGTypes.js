@@ -132,9 +132,9 @@ class MTGDeck {
         ? card.name.split(" // ")[0]
         : card.name;
 
-      if (card.name.includes("/")) {
-        cardName = card.name.split("/")[0];
-      }
+      // if (card.name.includes("/")) {
+      //   cardName = card.name.split("/")[0];
+      // }
       return { name: cardName };
     });
 
@@ -153,6 +153,7 @@ class MTGDeck {
           card.quantity = existingCard.quantity;
           return card;
         } else {
+
           console.log(`Card not found: ${cardData.name}`);
           return null;
         }
