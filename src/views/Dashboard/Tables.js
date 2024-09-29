@@ -16,6 +16,7 @@ import {
   Icon,
   useColorModeValue,
   Image,
+  Spacer,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { IoCheckmarkDoneCircleSharp } from "react-icons/io5";
@@ -210,6 +211,33 @@ function Tables() {
                   {getTotalMainZoneCards()} cards
                 </Text>{" "}
                 in this deck.
+              </Text>
+            </Flex>
+            <Flex align="center" mt={2}>
+              <Icon
+                as={IoCheckmarkDoneCircleSharp}
+                color="teal.300"
+                w={4}
+                h={4}
+                pe="3px"
+              />
+              <Text fontSize="sm" color="gray.400" fontWeight="normal">
+                All cards legal in:{" "}
+                {Object.entries(
+                  deck.reduce((acc, card) => {
+                    Object.entries(card.legalities).forEach(
+                      ([format, legality]) => {
+                        if (legality === "legal") {
+                          acc[format] = (acc[format] || 0) + 1;
+                        }
+                      }
+                    );
+                    return acc;
+                  }, {})
+                )
+                  .filter(([_, count]) => count === deck.length)
+                  .map(([format]) => format)
+                  .join(", ")}
               </Text>
             </Flex>
           </Flex>
