@@ -1,15 +1,21 @@
 {
   "files": {
     "main.css": "/web-converter-ui/static/css/main.566ac412.css",
-    "main.js": "/web-converter-ui/static/js/main.f30eba57.js",
+    "main.js": "/web-converter-ui/static/js/main.7a4f99af.js",
     "static/media/signInImage.png": "/web-converter-ui/static/media/signInImage.7c12b6aac9bdc3d3729b.png",
     "static/media/background-body-admin.png": "/web-converter-ui/static/media/background-body-admin.9a5703c114bec6efe39b.png",
+    "static/media/White.svg": "/web-converter-ui/static/media/White.6bcc68150b061ae03fefb9a46527ce96.svg",
+    "static/media/Green.svg": "/web-converter-ui/static/media/Green.e8d916fa6635b7289f27737f2c3d4630.svg",
+    "static/media/Black.svg": "/web-converter-ui/static/media/Black.c930a17d6d50914e05d0bb4cd21e9514.svg",
+    "static/media/Red.svg": "/web-converter-ui/static/media/Red.88769fbef61f238623da1d0b020c8691.svg",
+    "static/media/Colorless.svg": "/web-converter-ui/static/media/Colorless.0fd7d84e8fdb0e38e309e36146f9e4c1.svg",
     "index.html": "/web-converter-ui/index.html",
+    "static/media/Blue.svg": "/web-converter-ui/static/media/Blue.4b7eda4563ea2f6e65239d5e3b9de1b2.svg",
     "main.566ac412.css.map": "/web-converter-ui/static/css/main.566ac412.css.map",
-    "main.f30eba57.js.map": "/web-converter-ui/static/js/main.f30eba57.js.map"
+    "main.7a4f99af.js.map": "/web-converter-ui/static/js/main.7a4f99af.js.map"
   },
   "entrypoints": [
     "static/css/main.566ac412.css",
-    "static/js/main.f30eba57.js"
+    "static/js/main.7a4f99af.js"
   ]
 }
