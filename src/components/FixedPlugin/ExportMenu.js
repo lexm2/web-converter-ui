@@ -34,7 +34,7 @@ export default function ExportMenu(props) {
       borderRadius="50px"
       boxShadow="0 2px 12px 0 rgb(0 0 0 / 16%)"
     >
-      <FiDownload size="24px" color={navbarIcon} /> {/* Use the icon here */}
+      <FiDownload size="24px" color={navbarIcon} />
     </Button>
   );
 }

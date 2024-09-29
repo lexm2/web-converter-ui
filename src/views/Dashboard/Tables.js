@@ -14,9 +14,11 @@ import {
   Collapse,
   IconButton,
   Icon,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { IoCheckmarkDoneCircleSharp } from "react-icons/io5";
+import { FaPlus, FaMinus } from "react-icons/fa6";
 
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
@@ -42,6 +44,9 @@ function Tables() {
   const [isCarouselOpen, setIsCarouselOpen] = useState(false);
   const [selectedCardImages, setSelectedCardImages] = useState([]);
   const [selectedCard, setSelectedCard] = useState(null);
+
+  const bgButton = useColorModeValue("brand.200", "brand.700");
+  const bgButtonHover = useColorModeValue("brand.300", "brand.800");
 
   useEffect(() => {
     const loadDeck = async () => {
@@ -283,7 +288,8 @@ function Tables() {
                                   <Td>{card.name}</Td>
                                   <Td>
                                     <Flex align="center">
-                                      <Button
+                                      <IconButton
+                                        icon={<FaMinus />}
                                         size="xs"
                                         onClick={(e) => {
                                           e.stopPropagation();
@@ -293,27 +299,26 @@ function Tables() {
                                             -1
                                           );
                                         }}
-                                        bg="teal.500"
+                                        bg={bgButton}
                                         color="white"
-                                        _hover={{ bg: "teal.600" }}
+                                        _hover={{ bg: "brand.500" }}
                                         transition="background-color 0.2s ease-in-out"
-                                      >
-                                        -
-                                      </Button>
+                                        aria-label="Decrease quantity"
+                                      />
                                       <Text mx="2">{card.quantity}</Text>
-                                      <Button
+                                      <IconButton
+                                        icon={<FaPlus />}
                                         size="xs"
                                         onClick={(e) => {
                                           e.stopPropagation();
                                           updateQuantity(card.id, card.zone, 1);
                                         }}
-                                        bg="teal.500"
+                                        bg={bgButton}
                                         color="white"
-                                        _hover={{ bg: "teal.600" }}
+                                        _hover={{ bg: "brand.500" }}
                                         transition="background-color 0.2s ease-in-out"
-                                      >
-                                        +
-                                      </Button>
+                                        aria-label="Increase quantity"
+                                      />
                                     </Flex>
                                   </Td>
                                   <Td>{card.set}</Td>
