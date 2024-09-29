@@ -15,10 +15,18 @@ import {
   IconButton,
   Icon,
   useColorModeValue,
+  Image,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { IoCheckmarkDoneCircleSharp } from "react-icons/io5";
 import { FaPlus, FaMinus } from "react-icons/fa6";
+
+import GreenSvg from "assets/svg/Green.svg";
+import RedSvg from "assets/svg/Red.svg";
+import BlueSvg from "assets/svg/Blue.svg";
+import BlackSvg from "assets/svg/Black.svg";
+import WhiteSvg from "assets/svg/White.svg";
+import ColorlessSvg from "assets/svg/Colorless.svg";
 
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
@@ -47,6 +55,23 @@ function Tables() {
 
   const bgButton = useColorModeValue("brand.200", "brand.700");
   const bgButtonHover = useColorModeValue("brand.300", "brand.800");
+
+  const getColorImage = (color) => {
+    switch (color) {
+      case "G":
+        return GreenSvg;
+      case "R":
+        return RedSvg;
+      case "U":
+        return BlueSvg;
+      case "B":
+        return BlackSvg;
+      case "W":
+        return WhiteSvg;
+      default:
+        return ColorlessSvg;
+    }
+  };
 
   useEffect(() => {
     const loadDeck = async () => {
@@ -325,9 +350,27 @@ function Tables() {
                                   <Td>{card.edhrecRank}</Td>
                                   <Td>{card.cmc}</Td>
                                   <Td>
-                                    {card.colorIdentity
-                                      ? card.colorIdentity.join(", ")
-                                      : ""}
+                                    {card.colorIdentity ? (
+                                      card.colorIdentity.map((color, index) => (
+                                        <Image
+                                          key={index}
+                                          src={getColorImage(color)}
+                                          alt={color}
+                                          display="inline-block"
+                                          width="20px"
+                                          height="20px"
+                                          marginRight="2px"
+                                        />
+                                      ))
+                                    ) : (
+                                      <Image
+                                        src={ColorlessSvg}
+                                        alt="Colorless"
+                                        display="inline-block"
+                                        width="20px"
+                                        height="20px"
+                                      />
+                                    )}
                                   </Td>
                                   <Td>{card.rarity}</Td>
                                 </Tr>
