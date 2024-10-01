@@ -32,7 +32,11 @@ import ColorlessSvg from "assets/svg/Colorless.svg";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
-import { getCardPrints, getPrintData, moveImageToFront } from "models/MTGTypes.js";
+import {
+  getCardPrints,
+  getPrintData,
+  moveImageToFront,
+} from "models/MTGTypes.js";
 import Carousel from "./Carousel"; // Import the new Carousel component
 
 // Global variable to store the carousel index
@@ -342,8 +346,8 @@ function Tables() {
                                   _hover={{ bg: "gray.700", cursor: "pointer" }}
                                   onClick={() => handleRowClick(card)}
                                 >
-                                  <Td>{card.name}</Td>
-                                  <Td>
+                                  <Td width="30%">{card.name}</Td>
+                                  <Td width="15%">
                                     <Flex align="center">
                                       <IconButton
                                         icon={<FaMinus />}
@@ -378,10 +382,10 @@ function Tables() {
                                       />
                                     </Flex>
                                   </Td>
-                                  <Td>{card.set}</Td>
-                                  <Td>{card.edhrecRank}</Td>
-                                  <Td>{card.cmc}</Td>
-                                  <Td>
+                                  <Td width="10%">{card.set}</Td>
+                                  <Td width="15%">{card.edhrecRank}</Td>
+                                  <Td width="10%">{card.cmc}</Td>
+                                  <Td width="10%">
                                     {card.colorIdentity ? (
                                       card.colorIdentity.map((color, index) => (
                                         <Image
@@ -404,7 +408,7 @@ function Tables() {
                                       />
                                     )}
                                   </Td>
-                                  <Td>{card.rarity}</Td>
+                                  <Td width="10%">{card.rarity}</Td>
                                 </Tr>
                               ))}
                             </Tbody>
