@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@chakra-ui/react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCoverflow, Navigation, Pagination } from "swiper/modules";
@@ -45,6 +45,20 @@ const Carousel = ({
   globalCarouselIndex,
   updateCarouselIndex,
 }) => {
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        closeCarousel();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [closeCarousel]);
+
   return (
     <BlurBackground onClick={closeCarousel}>
       <CarouselContainer onClick={(e) => e.stopPropagation()}>
