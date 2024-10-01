@@ -123,6 +123,17 @@ function Tables() {
     setLoadingPrints(false);
     console.log(artPrintings);
     if (artPrintings && artPrintings.length > 0) {
+      // Find the index of the current card in artPrintings
+      const currentCardIndex = artPrintings.findIndex(
+        (print) => print.id === card.id
+      );
+
+      // If found, move it to the beginning of the array
+      if (currentCardIndex !== -1) {
+        const [currentCard] = artPrintings.splice(currentCardIndex, 1);
+        artPrintings.unshift(currentCard);
+      }
+
       setSelectedCardImages(artPrintings);
       setSelectedCard(card);
       globalCarouselIndex = 0;
