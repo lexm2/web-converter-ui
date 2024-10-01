@@ -23,7 +23,7 @@ class MTGCard {
   constructor(cardData, sectionName, quantity) {
     this.object = cardData.object;
     this.id = cardData.id;
-    this.oracleId = cardData.oracle_id;
+    this.oracle_id = cardData.oracle_id;
     this.multiverseIds = cardData.multiverse_ids;
     this.mtgoId = cardData.mtgo_id;
     this.arenaId = cardData.arena_id;
@@ -169,9 +169,8 @@ class MTGDeck {
 
 async function getCardPrints(card) {
   // Check if the card prints are already in the cache
-  if (cardPrintsCache[card.id]) {
-    console.log("Returning cached prints for card:", card.name);
-    return cardPrintsCache[card.id].artPrintings;
+  if (cardPrintsCache[card.oracle_id]) {
+    return cardPrintsCache[card.oracle_id].artPrintings;
   }
 
   const client = axios.create({
@@ -184,13 +183,47 @@ async function getCardPrints(card) {
   const response = await API.getAllPrintings(client, card.printsSearchUri);
 
   // Store the response in the cache
-  cardPrintsCache[card.id] = response;
+  cardPrintsCache[card.oracle_id] = response;
 
   return response.artPrintings;
 }
 
-function getPrintData(cardID, index) {
-  const print = cardPrintsCache[cardID];
+function moveImageToFront(cardOracleId, cardIndex) {
+  const cardCachedData = cardPrintsCache[cardOracleId];
+
+  if (!cardCachedData) {
+    console.log(`Card with oracle ID ${cardOracleId} not found in cache`);
+    return;
+  }
+
+  const { artPrintings, cardData, dualsided } = cardCachedData;
+
+  if (dualsided) {
+    const frontIndex = cardIndex % 2 === 0 ? cardIndex : cardIndex - 1;
+    if (frontIndex + 1 >= artPrintings.length) {
+      console.log(`Invalid image index for dual-sided card ${cardOracleId}`);
+      return;
+    }
+    const backImage = artPrintings.splice(frontIndex, 1)[0]; // Order matters
+    const frontImage = artPrintings.splice(frontIndex, 1)[0];
+    artPrintings.unshift(backImage, frontImage);
+  } else {
+    if (cardIndex >= artPrintings.length) {
+      console.log(`Invalid image index for card ${cardOracleId}`);
+      return;
+    }
+
+    const image = artPrintings.splice(cardIndex, 1)[0];
+    artPrintings.unshift(image);
+  }
+
+  // Update the cache with the modified artPrintings
+  cardPrintsCache[cardOracleId].artPrintings = artPrintings;
+}
+
+function getPrintData(cardOracleID, index) {
+  console.log(cardPrintsCache);
+  const print = cardPrintsCache[cardOracleID];
   if (print.dualsided) {
     console.log("dualsided");
     index = Math.floor(index / 2);
@@ -377,4 +410,5 @@ export {
   writeXML,
   getCardPrints,
   getPrintData,
+  moveImageToFront,
 };

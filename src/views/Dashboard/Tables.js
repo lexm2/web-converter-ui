@@ -32,7 +32,7 @@ import ColorlessSvg from "assets/svg/Colorless.svg";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
-import { getCardPrints, getPrintData } from "models/MTGTypes.js";
+import { getCardPrints, getPrintData, moveImageToFront } from "models/MTGTypes.js";
 import Carousel from "./Carousel"; // Import the new Carousel component
 
 // Global variable to store the carousel index
@@ -128,12 +128,6 @@ function Tables() {
         (print) => print.id === card.id
       );
 
-      // If found, move it to the beginning of the array
-      if (currentCardIndex !== -1) {
-        const [currentCard] = artPrintings.splice(currentCardIndex, 1);
-        artPrintings.unshift(currentCard);
-      }
-
       setSelectedCardImages(artPrintings);
       setSelectedCard(card);
       globalCarouselIndex = 0;
@@ -142,7 +136,6 @@ function Tables() {
       alert("No art printings found for this card.");
     }
   };
-
   const closeCarousel = () => {
     setIsCarouselOpen(false);
   };
@@ -150,17 +143,17 @@ function Tables() {
   const handleSelectCard = () => {
     if (selectedCard) {
       const cardIndex = deck.findIndex(
-        (card) => card.oracleId === selectedCard.oracleId
+        (card) => card.oracle_id === selectedCard.oracle_id
       );
       if (cardIndex === -1) {
-        console.log(`Card with ID ${cardId} not found in the deck.`);
+        console.log(`Card with ID ${card.oracle_id} not found in the deck.`);
         return;
       }
       console.log(globalCarouselIndex);
-      const newCard = getPrintData(selectedCard.id, globalCarouselIndex);
+      const newCard = getPrintData(selectedCard.oracle_id, globalCarouselIndex);
       Object.assign(deck[cardIndex], newCard);
       localStorage.setItem("cachedDeck", JSON.stringify(deck));
-
+      moveImageToFront(selectedCard.oracle_id, globalCarouselIndex);
       closeCarousel();
     }
   };
