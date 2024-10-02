@@ -89,7 +89,7 @@ const Carousel = ({
         </Swiper>
         <Button
           mt={4}
-          colorScheme="teal"
+          colorScheme="brand"
           onClick={handleSelectCard}
           display="block"
           mx="auto"

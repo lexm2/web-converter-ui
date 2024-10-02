@@ -1,6 +1,5 @@
-// Chakra Icons
-import { BellIcon, SearchIcon } from "@chakra-ui/icons";
-// Chakra Imports
+import React, { useEffect, useRef, useState } from "react";
+import { SearchIcon, BellIcon } from "@chakra-ui/icons";
 import {
   Button,
   Flex,
@@ -13,21 +12,28 @@ import {
   MenuItem,
   MenuList,
   Text,
+  Box,
+  useDisclosure,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
 } from "@chakra-ui/react";
-// Custom Icons
 import { ProfileIcon, SettingsIcon } from "components/Icons/Icons";
-// Custom Components
 import { ItemContent } from "components/Menu/ItemContent";
 import { SidebarResponsive } from "components/Sidebar/Sidebar";
 import PropTypes from "prop-types";
-import React from "react";
 import { NavLink } from "react-router-dom";
 import routes from "routes.js";
 
 export default function HeaderLinks(props) {
   const { variant, children, fixed, secondary, onOpen, ...rest } = props;
+  const { isOpen, onOpen: onSearchOpen, onClose } = useDisclosure();
+  const searchInputRef = useRef(null);
+  const [searchResults, setSearchResults] = useState([]);
 
-  // Chakra Color Mode
   let inputBg = "#0F1535";
   let mainText = "gray.400";
   let navbarIcon = "white";
@@ -38,138 +44,190 @@ export default function HeaderLinks(props) {
     mainText = "white";
   }
   const settingsRef = React.useRef();
+
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    const handleClickOutside = (event) => {
+      if (
+        searchInputRef.current &&
+        !searchInputRef.current.contains(event.target) &&
+        !event.target.closest(".search-results-table")
+      ) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("keydown", handleEscape);
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
+  const handleSearch = (event) => {
+    const searchTerm = event.target.value;
+    // Simulated search results
+    const results = [
+      { id: 1, name: "Dashboard", type: "Page" },
+      { id: 2, name: "Profile", type: "Page" },
+      { id: 3, name: "Settings", type: "Feature" },
+      { id: 4, name: "Analytics", type: "Feature" },
+      { id: 5, name: "Users", type: "Data" },
+    ].filter((item) =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setSearchResults(results);
+  };
+
   return (
     <Flex
       pe={{ sm: "0px", md: "16px" }}
       w={{ sm: "100%", md: "auto" }}
-      alignItems='center'
-      flexDirection='row'>
-      <InputGroup
-        cursor='pointer'
-        bg={inputBg}
-        borderRadius='15px'
-        borderColor='rgba(226, 232, 240, 0.3)'
-        w={{
-          sm: "128px",
-          md: "200px",
-        }}
-        me={{ sm: "auto", md: "20px" }}>
-        <InputLeftElement
-          children={
-            <IconButton
-              bg='inherit'
-              borderRadius='inherit'
-              _hover='none'
-              _active={{
-                bg: "inherit",
-                transform: "none",
-                borderColor: "transparent",
-              }}
-              _focus={{
-                boxShadow: "none",
-              }}
-              icon={
-                <SearchIcon color={searchIcon} w='15px' h='15px' />
-              }></IconButton>
-          }
-        />
-        <Input
-          fontSize='xs'
-          py='11px'
-          color={mainText}
-          placeholder='Doesnt work yet'
-          borderRadius='inherit'
-        />
-      </InputGroup>
+      alignItems="center"
+      flexDirection="row"
+    >
+      <IconButton
+        aria-label="Search"
+        icon={<SearchIcon color={searchIcon} w="18px" h="18px" />}
+        bg="inherit"
+        borderRadius="30%"
+        _hover={{ bg: "whiteAlpha.200" }}
+        onClick={onSearchOpen}
+      />
+      <Box
+        position="fixed"
+        top="0"
+        left="0"
+        right="0"
+        bottom="0"
+        bg="rgba(0, 0, 0, 0.7)"
+        backdropFilter={isOpen ? "blur(10px)" : "blur(0px)"}
+        zIndex="9999"
+        display="flex"
+        alignItems="flex-start"
+        justifyContent="center"
+        pt="100px"
+        opacity={isOpen ? 1 : 0}
+        pointerEvents={isOpen ? "auto" : "none"}
+        transition="all 0.3s ease-in-out"
+      >
+        <Flex direction="column" w="50%">
+          <InputGroup
+            ref={searchInputRef}
+            bg={inputBg}
+            borderRadius="10px"
+            mb={2}
+          >
+            <InputLeftElement
+              children={
+                <IconButton
+                  bg="inherit"
+                  borderRadius="inherit"
+                  _hover="none"
+                  _active={{
+                    bg: "inherit",
+                    transform: "none",
+                    borderColor: "transparent",
+                  }}
+                  _focus={{
+                    boxShadow: "none",
+                  }}
+                  icon={<SearchIcon color={searchIcon} w="15px" h="15px" />}
+                ></IconButton>
+              }
+            />
+            <Input
+              fontSize="xs"
+              py="11px"
+              color={mainText}
+              placeholder="Type here..."
+              borderRadius="inherit"
+              onChange={handleSearch}
+              autoFocus
+            />
+          </InputGroup>
+          {searchResults.length > 0 && (
+            <Box
+              bg={inputBg}
+              borderRadius="15px"
+              mt={2}
+              p={4}
+              className="search-results-table"
+              borderColor="gray.600"
+              borderWidth={"1px"}
+            >
+              <Table
+                variant="striped"
+                colorScheme="whiteAlpha"
+                color={mainText}
+              >
+                <Thead>
+                  <Tr>
+                    <Th color={mainText} borderBottom="none">
+                      Name
+                    </Th>
+                    <Th color={mainText} borderBottom="none">
+                      Type
+                    </Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {searchResults.map((result) => (
+                    <Tr key={result.id}>
+                      <Td borderBottom="none">{result.name}</Td>
+                      <Td borderBottom="none">{result.type}</Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </Box>
+          )}
+        </Flex>
+      </Box>
       <SidebarResponsive
-        iconColor='gray.500'
+        iconColor="gray.500"
         logoText={props.logoText}
         secondary={props.secondary}
         routes={routes}
-        // logo={logo}
         {...rest}
       />
-      <SettingsIcon
-        cursor='pointer'
-        ms={{ base: "16px", xl: "0px" }}
-        me='16px'
-        ref={settingsRef}
+      <IconButton
+        aria-label="Settings"
+        icon={<SettingsIcon color={navbarIcon} w="18px" h="18px" />}
+        bg="inherit"
+        borderRadius="50%"
+        _hover={{ bg: "whiteAlpha.200" }}
         onClick={props.onOpen}
-        color={navbarIcon}
-        w='18px'
-        h='18px'
       />
-      {/* <Menu>
-        <MenuButton align='center'>
-          <BellIcon color={navbarIcon} mt='-4px' w='18px' h='18px' />
-        </MenuButton>
-
+      <Menu>
+        <MenuButton
+          as={IconButton}
+          aria-label="Notifications"
+          icon={<BellIcon color={navbarIcon} w="18px" h="18px" />}
+          bg="inherit"
+          borderRadius="50%"
+          _hover={{ bg: "whiteAlpha.200" }}
+        />
         <MenuList
-          border='transparent'
-          backdropFilter='blur(63px)'
-          bg='linear-gradient(127.09deg, rgba(6, 11, 40, 0.94) 19.41%, rgba(10, 14, 35, 0.69) 76.65%)'
-          borderRadius='20px'>
-          <Flex flexDirection='column'>
-            <MenuItem
-              borderRadius='8px'
-              _hover={{
-                bg: "transparent",
-              }}
-              _active={{
-                bg: "transparent",
-              }}
-              _focus={{
-                bg: "transparent",
-              }}
-              mb='10px'>
-              <ItemContent
-                time='13 minutes ago'
-                info='from Alicia'
-                boldInfo='New Message'
-                aName='Alicia'
-                aSrc={avatar1}
-              />
-            </MenuItem>
-            <MenuItem
-              borderRadius='8px'
-              _active={{
-                bg: "transparent",
-              }}
-              _focus={{
-                bg: "transparent",
-              }}
-              _hover={{ bg: "transparent" }}
-              mb='10px'>
-              <ItemContent
-                time='2 days ago'
-                info='by Josh Henry'
-                boldInfo='New Album'
-                aName='Josh Henry'
-                aSrc={avatar2}
-              />
-            </MenuItem>
-            <MenuItem
-              borderRadius='8px'
-              _hover={{
-                bg: "transparent",
-              }}
-              _active={{
-                bg: "transparent",
-              }}
-              _focus={{
-                bg: "transparent",
-              }}>
-              <ItemContent
-                time='3 days ago'
-                info='Payment succesfully completed!'
-                boldInfo=''
-                aName='Kara'
-                aSrc={avatar3}
-              />
-            </MenuItem>
+          border="transparent"
+          backdropFilter="blur(63px)"
+          bg="linear-gradient(127.09deg, rgba(6, 11, 40, 0.94) 19.41%, rgba(10, 14, 35, 0.69) 76.65%)"
+          borderRadius="20px"
+        >
+          <Flex flexDirection="column">
+            {/* Menu items can be added here */}
           </Flex>
         </MenuList>
-      </Menu> */}
+      </Menu>
     </Flex>
   );
 }
