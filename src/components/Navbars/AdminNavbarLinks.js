@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { SearchIcon, BellIcon } from "@chakra-ui/icons";
+import { SearchIcon, BellIcon, AddIcon } from "@chakra-ui/icons";
 import {
   Button,
   Flex,
@@ -22,8 +22,10 @@ import {
   Td,
 } from "@chakra-ui/react";
 import { ProfileIcon, SettingsIcon } from "components/Icons/Icons";
+import API from "models/API.js";
 import { ItemContent } from "components/Menu/ItemContent";
 import { SidebarResponsive } from "components/Sidebar/Sidebar";
+import { debounce } from "lodash";
 import PropTypes from "prop-types";
 import { NavLink } from "react-router-dom";
 import routes from "routes.js";
@@ -33,6 +35,9 @@ export default function HeaderLinks(props) {
   const { isOpen, onOpen: onSearchOpen, onClose } = useDisclosure();
   const searchInputRef = useRef(null);
   const [searchResults, setSearchResults] = useState([]);
+
+  const [hasTyped, setHasTyped] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   let inputBg = "#0F1535";
   let mainText = "gray.400";
@@ -44,6 +49,33 @@ export default function HeaderLinks(props) {
     mainText = "white";
   }
   const settingsRef = React.useRef();
+
+  const debouncedSearch = useRef(
+    debounce(async (term) => {
+      if (term.length > 0) {
+        const results = await API.autocompleteCardSearch(term);
+        setSearchResults(
+          results.map((name, index) => ({ id: index, name}))
+        );
+      }
+    }, 1000)
+  ).current;
+
+  const handleSearch = (event) => {
+    const term = event.target.value;
+    setSearchTerm(term);
+    setHasTyped(true);
+    debouncedSearch(term);
+  };
+
+  const handleAddCard = async (cardName) => {
+    const cardDetails = await API.loadSingleCardDetails(cardName);
+    if (cardDetails) {
+      const updatedDeck = { ...deck };
+      updatedDeck.addCard(cardDetails);
+      setDeck(updatedDeck);
+    }
+  };
 
   useEffect(() => {
     const handleEscape = (event) => {
@@ -73,20 +105,17 @@ export default function HeaderLinks(props) {
     };
   }, [isOpen, onClose]);
 
-  const handleSearch = (event) => {
-    const searchTerm = event.target.value;
-    // Simulated search results
-    const results = [
-      { id: 1, name: "Dashboard", type: "Page" },
-      { id: 2, name: "Profile", type: "Page" },
-      { id: 3, name: "Settings", type: "Feature" },
-      { id: 4, name: "Analytics", type: "Feature" },
-      { id: 5, name: "Users", type: "Data" },
-    ].filter((item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setSearchResults(results);
-  };
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isOpen]);
 
   return (
     <Flex
@@ -152,10 +181,11 @@ export default function HeaderLinks(props) {
               placeholder="Type here..."
               borderRadius="inherit"
               onChange={handleSearch}
+              value={searchTerm}
               autoFocus
             />
           </InputGroup>
-          {searchResults.length > 0 && (
+          {hasTyped && searchResults.length > 0 && (
             <Box
               bg={inputBg}
               borderRadius="15px"
@@ -164,26 +194,50 @@ export default function HeaderLinks(props) {
               className="search-results-table"
               borderColor="gray.600"
               borderWidth={"1px"}
+              maxHeight="70vh"
+              overflowY="auto"
+              css={{
+                "&::-webkit-scrollbar": {
+                  width: "4px",
+                },
+                "&::-webkit-scrollbar-track": {
+                  width: "6px",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  background: "gray.500",
+                  borderRadius: "24px",
+                },
+              }}
             >
               <Table
+                variant="striped"
                 colorScheme="whiteAlpha"
                 color={mainText}
+                fontSize="xs"
               >
                 <Thead>
                   <Tr>
-                    <Th color={mainText} borderBottom="none">
+                    <Th color={mainText} borderBottom="none" fontSize="xs">
                       Name
-                    </Th>
-                    <Th color={mainText} borderBottom="none">
-                      Type
                     </Th>
                   </Tr>
                 </Thead>
                 <Tbody>
                   {searchResults.map((result) => (
                     <Tr key={result.id}>
-                      <Td borderBottom="none">{result.name}</Td>
-                      <Td borderBottom="none">{result.type}</Td>
+                      <Td borderBottom="none" fontSize="xs">
+                        {result.name}
+                      </Td>
+                      <Td borderBottom="none" fontSize="xs" textAlign="right">
+                        <IconButton
+                          aria-label="Add card"
+                          icon={<AddIcon />}
+                          size="sm"
+                          variant="ghost"
+                          colorScheme="whiteAlpha"
+                          onClick={() => handleAddCard(card.name)}
+                        />
+                      </Td>
                     </Tr>
                   ))}
                 </Tbody>

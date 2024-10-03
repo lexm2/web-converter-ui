@@ -26,7 +26,6 @@ class API {
   static async getAllPrintings(client, printsSearchUri) {
     const response = await client.get(printsSearchUri);
 
-
     const artPrintings = [];
     const cardData = [];
     let dualsided = false;
@@ -58,6 +57,48 @@ class API {
 
   static async getAllArtPrintingsForDeck(deck) {
     return artPrintings;
+  }
+
+  static async autocompleteCardSearch(query) {
+    const client = axios.create({
+      baseURL: "https://api.scryfall.com/",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    try {
+      const response = await client.get(
+        `cards/autocomplete?q=${encodeURIComponent(query)}`
+      );
+      return response.data.data; // This will be an array of card names
+    } catch (error) {
+      console.error("Error in autocomplete search:", error);
+      return []; // Return an empty array if there's an error
+    }
+  }
+
+  static async loadSingleCardDetails(cardName) {
+    const client = axios.create({
+      baseURL: "https://api.scryfall.com/",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    let card = cardName.includes(" // ")
+      ? cardName.split(" // ")[0]
+      : cardName;
+
+    try {
+      const response = await client.get(
+        `cards/named?fuzzy=${encodeURIComponent(card)}`
+      );
+      return new MTGCard(response.data, "Main");
+    } catch (error) {
+      console.error(`Error loading details for card: ${card}`, error);
+      return null;
+    }
   }
 }
 

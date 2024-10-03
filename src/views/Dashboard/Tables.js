@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
 import {
   Flex,
   Table,
@@ -31,6 +30,7 @@ import ColorlessSvg from "assets/svg/Colorless.svg";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
+import { useDeck } from 'components/context/DeckContext';
 import {
   getCardPrints,
   getPrintData,
@@ -41,9 +41,8 @@ import Carousel from "./Carousel";
 let globalCarouselIndex = 0;
 
 function Tables() {
-  const [deck, setDeck] = useState([]);
-  const location = useLocation();
-  const [loading, setLoading] = useState(true);
+  const { deck, loading, updateQuantity, getTotalMainZoneCards } = useDeck();
+  console.log(deck);
   const [loadingPrints, setLoadingPrints] = useState(false);
   const [openZones, setOpenZones] = useState({
     Main: true,
@@ -73,42 +72,6 @@ function Tables() {
       default:
         return ColorlessSvg;
     }
-  };
-
-  useEffect(() => {
-    const loadDeck = async () => {
-      const loadedDeck = location.state?.deck;
-      if (loadedDeck) {
-        console.log("Loaded deck from local storage:", loadedDeck);
-        setDeck(loadedDeck);
-      } else {
-        const cachedDeck = localStorage.getItem("cachedDeck");
-        if (cachedDeck) {
-          const parsedDeck = JSON.parse(cachedDeck);
-          setDeck(parsedDeck);
-        } else {
-          alert("No deck found. Please load a deck first.");
-        }
-      }
-      setLoading(false);
-    };
-
-    loadDeck();
-  }, [location]);
-
-  useEffect(() => {
-    localStorage.setItem("cachedDeck", JSON.stringify(deck));
-  }, [deck]);
-
-  const updateQuantity = (cardId, zone, delta) => {
-    const updatedDeck = deck.map((card) => {
-      if (card.id === cardId && card.zone === zone) {
-        console.log("Deck updated:", card.quantity + delta);
-        return { ...card, quantity: Math.max(1, card.quantity + delta) };
-      }
-      return card;
-    });
-    setDeck(updatedDeck);
   };
 
   const toggleZone = (zone) => {
@@ -161,12 +124,6 @@ function Tables() {
 
   const updateCarouselIndex = (index) => {
     globalCarouselIndex = index;
-  };
-
-  const getTotalMainZoneCards = () => {
-    return deck
-      .filter((card) => card.zone === "Main")
-      .reduce((total, card) => total + card.quantity, 0);
   };
 
   if (loading) {
