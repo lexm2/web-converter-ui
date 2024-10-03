@@ -31,7 +31,9 @@ export const DeckProvider = ({ children }) => {
   }, [location]);
 
   useEffect(() => {
-    localStorage.setItem("cachedDeck", JSON.stringify(deck));
+    if (deck.length > 0) {
+      localStorage.setItem("cachedDeck", JSON.stringify(deck));
+    }
   }, [deck]);
 
   const updateQuantity = (cardId, zone, delta) => {

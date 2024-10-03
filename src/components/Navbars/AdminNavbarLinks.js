@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useDeck } from "components/context/DeckContext";
 import { SearchIcon, BellIcon, AddIcon } from "@chakra-ui/icons";
 import {
   Button,
@@ -31,8 +32,10 @@ import { NavLink } from "react-router-dom";
 import routes from "routes.js";
 
 export default function HeaderLinks(props) {
+  const { deck, addCard } = useDeck();
   const { variant, children, fixed, secondary, onOpen, ...rest } = props;
   const { isOpen, onOpen: onSearchOpen, onClose } = useDisclosure();
+  const searchObject = useRef(null);
   const searchInputRef = useRef(null);
   const [searchResults, setSearchResults] = useState([]);
 
@@ -54,9 +57,7 @@ export default function HeaderLinks(props) {
     debounce(async (term) => {
       if (term.length > 0) {
         const results = await API.autocompleteCardSearch(term);
-        setSearchResults(
-          results.map((name, index) => ({ id: index, name}))
-        );
+        setSearchResults(results.map((name, index) => ({ id: index, name })));
       }
     }, 1000)
   ).current;
@@ -69,12 +70,8 @@ export default function HeaderLinks(props) {
   };
 
   const handleAddCard = async (cardName) => {
-    const cardDetails = await API.loadSingleCardDetails(cardName);
-    if (cardDetails) {
-      const updatedDeck = { ...deck };
-      updatedDeck.addCard(cardDetails);
-      setDeck(updatedDeck);
-    }
+    console.log("Adding card:", cardName);
+    addCard(cardName);
   };
 
   useEffect(() => {
@@ -86,8 +83,8 @@ export default function HeaderLinks(props) {
 
     const handleClickOutside = (event) => {
       if (
-        searchInputRef.current &&
-        !searchInputRef.current.contains(event.target) &&
+        searchObject.current &&
+        !searchObject.current.contains(event.target) &&
         !event.target.closest(".search-results-table")
       ) {
         onClose();
@@ -115,6 +112,12 @@ export default function HeaderLinks(props) {
     return () => {
       document.body.style.overflow = "auto";
     };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
   }, [isOpen]);
 
   return (
@@ -151,7 +154,7 @@ export default function HeaderLinks(props) {
       >
         <Flex direction="column" w="50%">
           <InputGroup
-            ref={searchInputRef}
+            ref={searchObject}
             bg={inputBg}
             borderRadius="10px"
             mb={2}
@@ -175,6 +178,7 @@ export default function HeaderLinks(props) {
               }
             />
             <Input
+              ref={searchInputRef}
               fontSize="xs"
               py="11px"
               color={mainText}
@@ -182,7 +186,6 @@ export default function HeaderLinks(props) {
               borderRadius="inherit"
               onChange={handleSearch}
               value={searchTerm}
-              autoFocus
             />
           </InputGroup>
           {hasTyped && searchResults.length > 0 && (
@@ -228,6 +231,9 @@ export default function HeaderLinks(props) {
                       <Td borderBottom="none" fontSize="xs">
                         {result.name}
                       </Td>
+                      <Td borderBottom="none" fontSize="xs">
+                        {result.type}
+                      </Td>
                       <Td borderBottom="none" fontSize="xs" textAlign="right">
                         <IconButton
                           aria-label="Add card"
@@ -235,7 +241,10 @@ export default function HeaderLinks(props) {
                           size="sm"
                           variant="ghost"
                           colorScheme="whiteAlpha"
-                          onClick={() => handleAddCard(card.name)}
+                          onClick={() => {
+                            handleAddCard(result.name);
+                            onClose();
+                          }}
                         />
                       </Td>
                     </Tr>

@@ -42,7 +42,6 @@ let globalCarouselIndex = 0;
 
 function Tables() {
   const { deck, loading, updateQuantity, getTotalMainZoneCards } = useDeck();
-  console.log(deck);
   const [loadingPrints, setLoadingPrints] = useState(false);
   const [openZones, setOpenZones] = useState({
     Main: true,

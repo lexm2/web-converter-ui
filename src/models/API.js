@@ -1,4 +1,5 @@
 import axios from "axios";
+import { MTGCard } from "models/MTGTypes";
 
 class API {
   static async getCollection(client, identifiers) {
