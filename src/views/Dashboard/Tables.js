@@ -15,6 +15,7 @@ import {
   Icon,
   useColorModeValue,
   Image,
+  useToast,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { IoCheckmarkDoneCircleSharp } from "react-icons/io5";
@@ -30,7 +31,7 @@ import ColorlessSvg from "assets/svg/Colorless.svg";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
-import { useDeck } from 'components/context/DeckContext';
+import { useDeck } from "components/context/DeckContext";
 import {
   getCardPrints,
   getPrintData,
@@ -53,6 +54,7 @@ function Tables() {
   const [isCarouselOpen, setIsCarouselOpen] = useState(false);
   const [selectedCardImages, setSelectedCardImages] = useState([]);
   const [selectedCard, setSelectedCard] = useState(null);
+  const toast = useToast();
 
   const bgButton = useColorModeValue("brand.200", "brand.700");
 
@@ -95,7 +97,13 @@ function Tables() {
       globalCarouselIndex = 0;
       setIsCarouselOpen(true);
     } else {
-      alert("No art printings found for this card.");
+      toast({
+        title: "Error",
+        description: "No art printings found for this card.",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
     }
   };
 

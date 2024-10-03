@@ -21,7 +21,7 @@ export const DeckProvider = ({ children }) => {
           const parsedDeck = JSON.parse(cachedDeck);
           setDeck(parsedDeck);
         } else {
-          alert("No deck found. Please load a deck first.");
+          console.log("No deck found. Please load a deck first.");
         }
       }
       setLoading(false);
