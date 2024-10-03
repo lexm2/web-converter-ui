@@ -17,6 +17,11 @@ import {
   useColorModeValue,
   Image,
   Spacer,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  Box,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { IoCheckmarkDoneCircleSharp } from "react-icons/io5";
@@ -42,6 +47,43 @@ import Carousel from "./Carousel"; // Import the new Carousel component
 // Global variable to store the carousel index
 let globalCarouselIndex = 0;
 
+const CardContextMenu = ({
+  isOpen,
+  onClose,
+  position,
+  onAddToSideboard,
+  onRemoveFromDeck,
+}) => {
+  const bgColor =
+    "linear-gradient(127.09deg, rgba(6, 11, 40, 1) 19.41%, rgba(10, 14, 35, 1) 76.65%)";
+  const textColor = useColorModeValue("white", "white");
+  const hoverBg = useColorModeValue("gray.700", "gray.700");
+
+  return (
+    <Box position="fixed" top={position.y} left={position.x} zIndex={1000}>
+      <Menu isOpen={isOpen} onClose={onClose}>
+        <MenuButton position="absolute" opacity={0} />
+        <MenuList bg={bgColor} borderColor="brand.200">
+          <MenuItem
+            onClick={onAddToSideboard}
+            color={textColor}
+            _hover={{ bg: hoverBg }}
+          >
+            Add to Sideboard
+          </MenuItem>
+          <MenuItem
+            onClick={onRemoveFromDeck}
+            color={textColor}
+            _hover={{ bg: hoverBg }}
+          >
+            Remove from Deck
+          </MenuItem>
+        </MenuList>
+      </Menu>
+    </Box>
+  );
+};
+
 function Tables() {
   const [deck, setDeck] = useState([]);
   const location = useLocation();
@@ -57,6 +99,15 @@ function Tables() {
   const [isCarouselOpen, setIsCarouselOpen] = useState(false);
   const [selectedCardImages, setSelectedCardImages] = useState([]);
   const [selectedCard, setSelectedCard] = useState(null);
+  const [contextMenu, setContextMenu] = useState({
+    isOpen: false,
+    position: { x: 0, y: 0 },
+    card: null,
+  });
+
+  const closeContextMenu = () => {
+    setContextMenu({ isOpen: false, position: { x: contextMenu.position.x, y: contextMenu.position.y }, card: null });
+  };
 
   const bgButton = useColorModeValue("brand.200", "brand.700");
   const bgButtonHover = useColorModeValue("brand.300", "brand.800");
@@ -76,6 +127,25 @@ function Tables() {
       default:
         return ColorlessSvg;
     }
+  };
+
+  const handleContextMenu = (e, card) => {
+    e.preventDefault();
+    setContextMenu({
+      isOpen: true,
+      position: { x: e.clientX, y: e.clientY },
+      card: card,
+    });
+  };
+
+  const handleAddToSideboard = () => {
+    // Implement logic to add card to sideboard
+    closeContextMenu();
+  };
+
+  const handleRemoveFromDeck = () => {
+    // Implement logic to remove card from deck
+    closeContextMenu();
   };
 
   useEffect(() => {
@@ -102,6 +172,20 @@ function Tables() {
   useEffect(() => {
     localStorage.setItem("cachedDeck", JSON.stringify(deck));
   }, [deck]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (contextMenu.isOpen) {
+        closeContextMenu();
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [contextMenu.isOpen]);
 
   const updateQuantity = (cardId, zone, delta) => {
     const updatedDeck = deck.map((card) => {
@@ -345,6 +429,9 @@ function Tables() {
                                   key={index}
                                   _hover={{ bg: "gray.700", cursor: "pointer" }}
                                   onClick={() => handleRowClick(card)}
+                                  onContextMenu={(e) =>
+                                    handleContextMenu(e, card)
+                                  }
                                 >
                                   <Td width="30%">{card.name}</Td>
                                   <Td width="15%">
@@ -449,6 +536,13 @@ function Tables() {
           updateCarouselIndex={updateCarouselIndex}
         />
       )}
+      <CardContextMenu
+        isOpen={contextMenu.isOpen}
+        onClose={closeContextMenu}
+        position={contextMenu.position}
+        onAddToSideboard={handleAddToSideboard}
+        onRemoveFromDeck={handleRemoveFromDeck}
+      />
     </Flex>
   );
 }

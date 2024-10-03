@@ -166,7 +166,6 @@ export default function HeaderLinks(props) {
               borderWidth={"1px"}
             >
               <Table
-                variant="striped"
                 colorScheme="whiteAlpha"
                 color={mainText}
               >
