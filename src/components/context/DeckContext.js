@@ -53,6 +53,12 @@ export const DeckProvider = ({ children }) => {
     }
   };
 
+  const removeCard = (oracleId) => {
+    setDeck((prevDeck) =>
+      prevDeck.filter((card) => card.oracle_id !== oracleId)
+    );
+  };
+
   const getTotalMainZoneCards = () => {
     return deck
       .filter((card) => card.zone === "Main")
@@ -67,6 +73,7 @@ export const DeckProvider = ({ children }) => {
         loading,
         updateQuantity,
         addCard,
+        removeCard,
         getTotalMainZoneCards,
       }}
     >

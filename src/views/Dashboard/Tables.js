@@ -16,6 +16,9 @@ import {
   useColorModeValue,
   Image,
   useToast,
+  SimpleGrid,
+  Box,
+  HStack,
 } from "@chakra-ui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { IoCheckmarkDoneCircleSharp } from "react-icons/io5";
@@ -42,7 +45,7 @@ import Carousel from "./Carousel";
 let globalCarouselIndex = 0;
 
 function Tables() {
-  const { deck, loading, updateQuantity, getTotalMainZoneCards } = useDeck();
+  const { deck, loading, updateQuantity, getTotalMainZoneCards, removeCard } = useDeck();
   const [loadingPrints, setLoadingPrints] = useState(false);
   const [openZones, setOpenZones] = useState({
     Main: true,
@@ -158,7 +161,7 @@ function Tables() {
   }, {});
 
   return (
-    <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
+    <Flex direction="column" pt={{ base: "120px", md: "75px" }} width="100%">
       <Card p="16px" overflowX={{ sm: "scroll", xl: "hidden" }}>
         <CardHeader p="12px 0px 28px 0px">
           <Flex direction="column">
@@ -212,175 +215,143 @@ function Tables() {
           </Flex>
         </CardHeader>
         {deck.length > 0 ? (
-          <CardBody>
-            <Table variant="simple" color="#fff">
-              <Tbody>
-                {zones.map((zone) => (
-                  <React.Fragment key={zone}>
-                    <Tr>
-                      <Td
-                        colSpan="11"
-                        style={{ fontWeight: "bold", color: "#fff" }}
-                      >
-                        <Flex align="center" justify="space-between">
-                          {zone}
-                          <IconButton
-                            size="sm"
-                            icon={
-                              openZones[zone] ? (
-                                <ChevronUpIcon />
-                              ) : (
-                                <ChevronDownIcon />
-                              )
-                            }
-                            onClick={() => toggleZone(zone)}
-                            aria-label={`Toggle ${zone}`}
-                            backgroundColor={"#2D3748"}
-                            _hover={{ bg: "blue.800" }}
-                            transition="background-color 0.2s ease-in-out"
-                          />
-                        </Flex>
-                      </Td>
-                    </Tr>
-                    <Tr>
-                      <Td colSpan="11" p={0}>
-                        <Collapse in={openZones[zone]} animateOpacity>
-                          <Table variant="simple" color="#fff" width="100%">
-                            <Thead>
-                              <Tr my=".8rem" ps="0px">
-                                <Th
-                                  ps="0px"
-                                  color="gray.400"
-                                  fontFamily="Plus Jakarta Display"
-                                  borderBottomColor="#56577A"
-                                >
-                                  Card Name
-                                </Th>
-                                <Th
-                                  color="gray.400"
-                                  fontFamily="Plus Jakarta Display"
-                                  borderBottomColor="#56577A"
-                                >
-                                  Quantity
-                                </Th>
-                                <Th
-                                  color="gray.400"
-                                  fontFamily="Plus Jakarta Display"
-                                  borderBottomColor="#56577A"
-                                >
-                                  Set
-                                </Th>
-                                <Th
-                                  color="gray.400"
-                                  fontFamily="Plus Jakarta Display"
-                                  borderBottomColor="#56577A"
-                                >
-                                  EDHREC rank
-                                </Th>
-                                <Th
-                                  color="gray.400"
-                                  fontFamily="Plus Jakarta Display"
-                                  borderBottomColor="#56577A"
-                                >
-                                  CMC
-                                </Th>
-                                <Th
-                                  color="gray.400"
-                                  fontFamily="Plus Jakarta Display"
-                                  borderBottomColor="#56577A"
-                                >
-                                  Colors
-                                </Th>
-                                <Th
-                                  color="gray.400"
-                                  fontFamily="Plus Jakarta Display"
-                                  borderBottomColor="#56577A"
-                                >
-                                  Rarity
-                                </Th>
-                              </Tr>
-                            </Thead>
-                            <Tbody>
-                              {cardsByZone[zone].map((card, index) => (
-                                <Tr
-                                  key={index}
-                                  _hover={{ bg: "gray.700", cursor: "pointer" }}
-                                  onClick={() => handleRowClick(card)}
-                                >
-                                  <Td width="30%">{card.name}</Td>
-                                  <Td width="15%">
-                                    <Flex align="center">
-                                      <IconButton
-                                        icon={<FaMinus />}
-                                        size="xs"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          updateQuantity(
-                                            card.id,
-                                            card.zone,
-                                            -1
-                                          );
-                                        }}
-                                        bg={bgButton}
-                                        color="white"
-                                        _hover={{ bg: "brand.500" }}
-                                        transition="background-color 0.2s ease-in-out"
-                                        aria-label="Decrease quantity"
-                                      />
-                                      <Text mx="2">{card.quantity}</Text>
-                                      <IconButton
-                                        icon={<FaPlus />}
-                                        size="xs"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          updateQuantity(card.id, card.zone, 1);
-                                        }}
-                                        bg={bgButton}
-                                        color="white"
-                                        _hover={{ bg: "brand.500" }}
-                                        transition="background-color 0.2s ease-in-out"
-                                        aria-label="Increase quantity"
-                                      />
-                                    </Flex>
-                                  </Td>
-                                  <Td width="10%">{card.set}</Td>
-                                  <Td width="15%">{card.edhrecRank}</Td>
-                                  <Td width="10%">{card.cmc}</Td>
-                                  <Td width="10%">
-                                    {card.colorIdentity ? (
-                                      card.colorIdentity.map((color, index) => (
-                                        <Image
-                                          key={index}
-                                          src={getColorImage(color)}
-                                          alt={color}
-                                          display="inline-block"
-                                          width="20px"
-                                          height="20px"
-                                          marginRight="2px"
-                                        />
-                                      ))
-                                    ) : (
-                                      <Image
-                                        src={ColorlessSvg}
-                                        alt="Colorless"
-                                        display="inline-block"
-                                        width="20px"
-                                        height="20px"
-                                      />
-                                    )}
-                                  </Td>
-                                  <Td width="10%">{card.rarity}</Td>
-                                </Tr>
-                              ))}
-                            </Tbody>
-                          </Table>
-                        </Collapse>
-                      </Td>
-                    </Tr>
-                  </React.Fragment>
-                ))}
-              </Tbody>
-            </Table>
+          <CardBody display="grid">
+            <Flex direction="column">
+              {zones.map((zone) => (
+                <Box key={zone} mb={4} width="100%">
+                  <Flex
+                    align="center"
+                    justify="space-between"
+                    mb={2}
+                    width="100%"
+                  >
+                    <Flex align="center">
+                      <Text fontWeight="bold" color="#fff" mr={2}>
+                        {zone}
+                      </Text>
+                      <IconButton
+                        size="sm"
+                        icon={
+                          openZones[zone] ? (
+                            <ChevronUpIcon />
+                          ) : (
+                            <ChevronDownIcon />
+                          )
+                        }
+                        onClick={() => toggleZone(zone)}
+                        aria-label={`Toggle ${zone}`}
+                        backgroundColor={"#2D3748"}
+                        _hover={{ bg: "blue.800" }}
+                        transition="background-color 0.2s ease-in-out"
+                      />
+                    </Flex>
+                  </Flex>
+                  <Collapse in={openZones[zone]} animateOpacity>
+                    <SimpleGrid
+                      columns={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5 }}
+                      spacing={4}
+                      templateColumns="repeat(auto-fill, minmax(480px, 1fr))"
+                      justifyItems="center"
+                    >
+                      {cardsByZone[zone].map((card, index) => (
+                        <Card
+                          key={index}
+                          onClick={() => handleRowClick(card)}
+                          position="relative"
+                          p={4}
+                          width={{
+                            base: "100%",
+                            sm: "380px",
+                            md: "420px",
+                            lg: "460px",
+                            xl: "500px",
+                          }}
+                          height={{ base: "60px", sm: "80px", md: "100px" }}
+                          border="1px solid"
+                          borderColor="blue.600"
+                          cursor="pointer"
+                          transition="all 0.3s"
+                          bgGradient="linear(to-r, brand.800, brand.1000)"
+                          _hover={{
+                            transform: "translateY(-5px)",
+                            boxShadow: "xl",
+                            bgGradient: "linear(to-r, brand.300, brand.500)",
+                          }}
+                          mt={2}
+                          mb={0}
+                        >
+                          <Text fontWeight="bold" color="white" mb={2}>
+                            {card.name}
+                          </Text>
+                          <HStack
+                            spacing={2}
+                            position="absolute"
+                            bottom={2}
+                            right={2}
+                          >
+                            <Button
+                              size="sm"
+                              colorScheme="blackAlpha"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                              }}
+                            >
+                              View
+                            </Button>
+                            <Button
+                              size="sm"
+                              colorScheme="purple"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeCard(card.oracle_id);
+                              }}
+                            >
+                              Delete
+                            </Button>
+                          </HStack>
+                          <Flex
+                            position="absolute"
+                            top={4}
+                            right={4}
+                            align="center"
+                          >
+                            <IconButton
+                              icon={<FaMinus />}
+                              size="xs"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateQuantity(card.id, card.zone, -1);
+                              }}
+                              bg={bgButton}
+                              color="white"
+                              _hover={{ bg: "brand.500" }}
+                              transition="background-color 0.2s ease-in-out"
+                              aria-label="Decrease quantity"
+                            />
+                            <Text mx="2" color="white">
+                              {card.quantity}
+                            </Text>
+                            <IconButton
+                              icon={<FaPlus />}
+                              size="xs"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateQuantity(card.id, card.zone, 1);
+                              }}
+                              bg={bgButton}
+                              color="white"
+                              _hover={{ bg: "brand.500" }}
+                              transition="background-color 0.2s ease-in-out"
+                              aria-label="Increase quantity"
+                            />
+                          </Flex>
+                        </Card>
+                      ))}
+                    </SimpleGrid>
+                  </Collapse>
+                </Box>
+              ))}
+            </Flex>
           </CardBody>
         ) : null}
       </Card>
