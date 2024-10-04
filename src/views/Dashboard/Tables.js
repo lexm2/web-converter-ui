@@ -231,6 +231,7 @@ function Tables() {
                       </Text>
                       <IconButton
                         size="sm"
+                        color="white"
                         icon={
                           openZones[zone] ? (
                             <ChevronUpIcon />
@@ -240,8 +241,8 @@ function Tables() {
                         }
                         onClick={() => toggleZone(zone)}
                         aria-label={`Toggle ${zone}`}
-                        backgroundColor={"#2D3748"}
-                        _hover={{ bg: "blue.800" }}
+                        backgroundColor={'brand.400'}
+                        _hover={{ bg: "brand.600" }}
                         transition="background-color 0.2s ease-in-out"
                       />
                     </Flex>
@@ -296,7 +297,7 @@ function Tables() {
                                 e.stopPropagation();
                               }}
                             >
-                              View
+                              Data
                             </Button>
                             <Button
                               size="sm"
