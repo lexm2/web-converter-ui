@@ -1,5 +1,6 @@
 import Tables from "views/Dashboard/Tables.js";
 import LoadDeck from "views/Pages/LoadDeck.js";
+import Dashboard from "views/Dashboard/Dashboard.js";
 
 import {
   StatsIcon,
@@ -20,6 +21,13 @@ var dashRoutes = [
     icon: <DocumentIcon color='inherit' />,
     component: LoadDeck,
     layout: "/auth",
+  },
+  {
+    path: "/dashboard",
+    name: "Dashboard",
+    icon: <StatsIcon color='inherit' />,
+    component: Dashboard,
+    layout: "/admin",
   },
 ];
 
