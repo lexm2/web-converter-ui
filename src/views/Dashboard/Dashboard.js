@@ -59,7 +59,7 @@ import {
 } from "components/Icons/Icons.js";
 import DashboardTableRow from "components/Tables/DashboardTableRow";
 import TimelineRow from "components/Tables/TimelineRow";
-import React from "react";
+import {React, useState, useEffect} from "react";
 import { AiFillCheckCircle } from "react-icons/ai";
 import { BiHappy } from "react-icons/bi";
 import { BsArrowRight } from "react-icons/bs";
@@ -82,14 +82,94 @@ import {
 } from "variables/charts";
 import { useDeck } from "components/context/DeckContext";
 
-export default function Dashboard({ cardData }) {
+export default function Dashboard() {
   const { deck } = useDeck();
-  cardData = deck[0];
-  console.log(cardData);
+  const [enrichedDeck, setEnrichedDeck] = useState(null);
+
+
+  console.log(deck);
+
+  const calculateDeckStats = (deck) => {
+    if (!deck?.length) return null;
+
+    console.log(deck[0].extraData);
+
+    let landCount = deck.filter((card) => card.typeLine?.includes("Land"))
+      .length;
+
+    return {
+
+      manaStats: {
+        averageCmc:
+          deck.reduce((acc, card) => acc + (card.cmc || 0), 0) / deck.length,
+        colorDistribution: deck.reduce((acc, card) => {
+          card.colors?.forEach((color) => (acc[color] = (acc[color] || 0) + 1));
+          return acc;
+        }, {}),
+      },
+
+      typeStats: {
+        creatures: deck.filter((card) => card.typeLine?.includes("Creature"))
+          .length,
+        instants: deck.filter((card) => card.typeLine?.includes("Instant"))
+          .length,
+        sorceries: deck.filter((card) => card.typeLine?.includes("Sorcery"))
+          .length,
+        artifacts: deck.filter((card) => card.typeLine?.includes("Artifact"))
+          .length,
+        enchantments: deck.filter((card) =>
+          card.typeLine?.includes("Enchantment")
+        ).length,
+        lands: landCount,
+        landPercentage: (landCount / deck.length) * 100,
+      },
+
+      rarityStats: {
+        common: deck.filter((card) => card.rarity === "common").length,
+        uncommon: deck.filter((card) => card.rarity === "uncommon").length,
+        rare: deck.filter((card) => card.rarity === "rare").length,
+        mythic: deck.filter((card) => card.rarity === "mythic").length,
+      },
+
+      valueStats: {
+        totalCost: deck.reduce(
+          (acc, card) => acc + Number(card.prices?.usd || 0),
+          0
+        ),
+        averageCardPrice:
+          deck.reduce((acc, card) => acc + Number(card.prices?.usd || 0), 0) /
+          deck.length,
+        mostExpensiveCard: deck.reduce((prev, curr) =>
+          Number(curr.prices?.usd || 0) > Number(prev.prices?.usd || 0)
+            ? curr
+            : prev
+        ),
+      },
+
+      powerStats: {
+        averagePower:
+          deck.reduce((acc, card) => acc + (Number(card.extraData.power) || 0), 0) /
+          deck.filter((card) => card.extraData.power).length,
+        averageToughness:
+          deck.reduce((acc, card) => acc + (Number(card.extraData.toughness) || 0), 0) /
+          deck.filter((card) => card.extraData.toughness).length,
+      },
+
+      setStats: {
+        setDistribution: deck.reduce((acc, card) => {
+          acc[card.setName] = (acc[card.setName] || 0) + 1;
+          return acc;
+        }, {}),
+      },
+    };
+  };
+
+  const deckStats = calculateDeckStats(enrichedDeck || deck);
+
   return (
     <Flex flexDirection="column" pt={{ base: "120px", md: "75px" }}>
       <SimpleGrid columns={{ sm: 1, md: 2, xl: 4 }} spacing="24px">
-        {/* Mana Cost */}
+        {/* Average CMC */}
         <Card>
           <CardBody>
             <Flex flexDirection="row" align="center" justify="center" w="100%">
@@ -100,11 +180,11 @@ export default function Dashboard({ cardData }) {
                   fontWeight="bold"
                   pb="2px"
                 >
-                  Mana Cost
+                  Average CMC
                 </StatLabel>
                 <Flex>
                   <StatNumber fontSize="lg" color="#fff">
-                    {cardData ? cardData.cmc : "N/A"}
+                    {deckStats?.manaStats.averageCmc.toFixed(2) || "N/A"}
                   </StatNumber>
                 </Flex>
               </Stat>
@@ -115,37 +195,8 @@ export default function Dashboard({ cardData }) {
             </Flex>
           </CardBody>
         </Card>
-        {/* Card Type */}
-        <Card minH="83px">
-          <CardBody>
-            <Flex flexDirection="row" align="center" justify="center" w="100%">
-              <Stat me="auto">
-                <StatLabel
-                  fontSize="sm"
-                  color="gray.400"
-                  fontWeight="bold"
-                  pb="2px"
-                >
-                  Card Type
-                </StatLabel>
-                <Flex>
-                  <StatNumber fontSize="lg" color="#fff">
-                    {cardData ? cardData.typeLine : "N/A"}
-                  </StatNumber>
-                </Flex>
-              </Stat>
-              <IconBox as="box" h={"45px"} w={"45px"} bg="brand.200">
-                <Icon
-                  as={TiChartPieOutline}
-                  h={"24px"}
-                  w={"24px"}
-                  color="#fff"
-                />
-              </IconBox>
-            </Flex>
-          </CardBody>
-        </Card>
-        {/* Card Price */}
+
+        {/* Total Cost */}
         <Card>
           <CardBody>
             <Flex flexDirection="row" align="center" justify="center" w="100%">
@@ -156,13 +207,11 @@ export default function Dashboard({ cardData }) {
                   fontWeight="bold"
                   pb="2px"
                 >
-                  Card Price
+                  Total Cost
                 </StatLabel>
                 <Flex>
                   <StatNumber fontSize="lg" color="#fff">
-                    {cardData && cardData.prices
-                      ? `$${cardData.prices.usd || "N/A"}`
-                      : "N/A"}
+                    ${deckStats?.valueStats.totalCost.toFixed(2) || "N/A"}
                   </StatNumber>
                 </Flex>
               </Stat>
@@ -173,7 +222,7 @@ export default function Dashboard({ cardData }) {
             </Flex>
           </CardBody>
         </Card>
-        {/* Rarity */}
+        {/* Average Power */}
         <Card>
           <CardBody>
             <Flex flexDirection="row" align="center" justify="center" w="100%">
@@ -184,17 +233,47 @@ export default function Dashboard({ cardData }) {
                   fontWeight="bold"
                   pb="2px"
                 >
-                  Rarity
+                  Average Power
                 </StatLabel>
                 <Flex>
                   <StatNumber fontSize="lg" color="#fff" fontWeight="bold">
-                    {cardData ? cardData.rarity : "N/A"}
+                    {deckStats?.powerStats.averagePower.toFixed(2) || "N/A"}
                   </StatNumber>
                 </Flex>
               </Stat>
               <IconBox as="box" h={"45px"} w={"45px"} bg="brand.200">
                 <Icon
                   as={TiStarburstOutline}
+                  h={"24px"}
+                  w={"24px"}
+                  color="#fff"
+                />
+              </IconBox>
+            </Flex>
+          </CardBody>
+        </Card>
+        {/* Average Toughness */}
+        <Card minH="83px">
+          <CardBody>
+            <Flex flexDirection="row" align="center" justify="center" w="100%">
+              <Stat me="auto">
+                <StatLabel
+                  fontSize="sm"
+                  color="gray.400"
+                  fontWeight="bold"
+                  pb="2px"
+                >
+                  Average Toughness
+                </StatLabel>
+                <Flex>
+                  <StatNumber fontSize="lg" color="#fff">
+                    {deckStats?.powerStats.averageToughness.toFixed(2) || "N/A"}
+                  </StatNumber>
+                </Flex>
+              </Stat>
+              <IconBox as="box" h={"45px"} w={"45px"} bg="brand.200">
+                <Icon
+                  as={TiChartPieOutline}
                   h={"24px"}
                   w={"24px"}
                   color="#fff"
@@ -214,7 +293,7 @@ export default function Dashboard({ cardData }) {
           <CardHeader mb="20px" ps="22px">
             <Flex direction="column" alignSelf="flex-start">
               <Text fontSize="lg" color="#fff" fontWeight="bold" mb="6px">
-                {cardData ? cardData.name : "Card Name"}
+                ${deckStats?.valueStats.totalCost.toFixed(2) || "N/A"}
               </Text>
               <Text fontSize="md" fontWeight="medium" color="gray.400">
                 Oracle Text
@@ -223,9 +302,7 @@ export default function Dashboard({ cardData }) {
           </CardHeader>
           <Box w="100%" minH={{ sm: "300px" }}>
             <Text color="#fff" p="22px">
-              {cardData && cardData.oracleText
-                ? cardData.oracleText
-                : "No oracle text available"}
+              ${deck?.extraData.oracle_text || "N/A"}
             </Text>
           </Box>
         </Card>

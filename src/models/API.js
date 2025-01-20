@@ -87,9 +87,7 @@ class API {
       },
     });
 
-    let card = cardName.includes(" // ")
-      ? cardName.split(" // ")[0]
-      : cardName;
+    let card = cardName.includes(" // ") ? cardName.split(" // ")[0] : cardName;
 
     try {
       const response = await client.get(

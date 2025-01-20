@@ -81,6 +81,7 @@ class MTGCard {
     this.relatedUris = cardData.related_uris;
     this.purchaseUris = cardData.purchase_uris;
     this.zone = sectionName;
+    this.extraData = cardData.extraData;
     this.quantity = quantity;
   }
 }
@@ -132,33 +133,31 @@ class MTGDeck {
       let cardName = card.name.includes(" // ")
         ? card.name.split(" // ")[0]
         : card.name;
-
-      // if (card.name.includes("/")) {
-      //   cardName = card.name.split("/")[0];
-      // }
       return { name: cardName };
     });
 
     const collection = await API.getCollection(client, identifiers);
-    this.cards = collection.data
-      .map((cardData) => {
+
+    this.cards = await Promise.all(
+      collection.data.map(async (cardData) => {
         const existingCard = this.cards.find(
           (c) =>
             c.name.includes(cardData.name) || cardData.name.includes(c.name)
         );
 
         if (existingCard) {
-          // Preserve the quantity field
-          const card = new MTGCard(cardData, existingCard.zone);
+          const response = await client.get(cardData.uri);
+          const detailedData = response;
+          cardData.extraData = detailedData.data;
 
+          // Create new card with all detailed data
+          const card = new MTGCard(cardData, existingCard.zone);
           card.quantity = existingCard.quantity;
           return card;
-        } else {
-          console.log(`Card not found: ${cardData.name}`);
-          return null;
         }
+        return null;
       })
-      .filter((card) => card !== null);
+    ).then((cards) => cards.filter((card) => card !== null));
 
     // Assign the cache only after the request is done
     localStorage.setItem("cachedDeck", JSON.stringify(this.cards));
