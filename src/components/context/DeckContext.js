@@ -65,6 +65,90 @@ export const DeckProvider = ({ children }) => {
       .reduce((total, card) => total + card.quantity, 0);
   };
 
+  const organizeCardsByZone = (deck) => {
+    const zones = {
+      Main: [],
+      Sideboard: [],
+      "Command Zone": [],
+      "Planes/Schemes": [],
+      Maybeboard: [],
+    };
+
+    deck?.forEach((card) => {
+      if (zones[card.zone]) {
+        zones[card.zone].push(card);
+      }
+    });
+
+    return zones;
+  };
+
+  const analyzeDeckLegality = (mainDeck, totalCards, highestQuantityCard) => {
+    const formatRules = {
+      alchemy: { maxCopies: 4, minDeckSize: 30 },
+      brawl: { maxCopies: 1, minDeckSize: 60, maxDeckSize: null},
+      commander: { maxCopies: 1, minDeckSize: 100 },
+      duel: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      explorer: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      future:  { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      gladiator: { maxCopies: 1, minDeckSize: 100, maxDeckSize: null },
+      historic: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      legacy: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      modern: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      oathbreaker: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      oldschool: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      pauper: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      paupercommander: { maxCopies: 1, minDeckSize: 100 },
+      penny: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      pioneer: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      predh: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      premodern: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      standard: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      standardbrawl: { maxCopies: 1, minDeckSize: 60, maxDeckSize: null},
+      timeless: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      vintage: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+    };
+
+    const legalFormats = mainDeck.reduce((acc, card) => {
+      Object.entries(card.legalities).forEach(([format, legality]) => {
+        if (legality === "legal") {
+          acc[format] = (acc[format] || 0) + 1;
+        }
+      });
+      return acc;
+    }, {});
+
+    const deckLegality = Object.entries(formatRules).reduce(
+      (acc, [format, rules]) => {
+        const isLegalSize = rules.maxDeckSize
+          ? totalCards >= rules.minDeckSize && totalCards <= rules.maxDeckSize
+          : totalCards === rules.minDeckSize;
+
+        acc[format] = {
+          isLegal:
+            isLegalSize && highestQuantityCard.quantity <= rules.maxCopies,
+          maxCopiesAllowed: rules.maxCopies,
+          minDeckSize: rules.minDeckSize,
+          maxDeckSize: rules.maxDeckSize || "unlimited",
+          currentDeckSize: totalCards,
+          highestCopyCount: highestQuantityCard.quantity,
+          cardWithMostCopies: highestQuantityCard.name,
+        };
+        return acc;
+      },
+      {}
+    );
+
+    const fullyLegalFormats = Object.entries(legalFormats)
+      .filter(([format, count]) => count === mainDeck.length)
+      .map(([format]) => format);
+
+    return {
+      deckLegality,
+      fullyLegalFormats,
+    };
+  };
+
   return (
     <DeckContext.Provider
       value={{
@@ -75,6 +159,8 @@ export const DeckProvider = ({ children }) => {
         addCard,
         removeCard,
         getTotalMainZoneCards,
+        organizeCardsByZone,
+        analyzeDeckLegality,
       }}
     >
       {children}

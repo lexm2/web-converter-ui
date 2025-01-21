@@ -18,6 +18,9 @@
 // Chakra imports
 import {
   Box,
+  Text,
+  List,
+  ListItem,
   Button,
   CircularProgress,
   CircularProgressLabel,
@@ -34,7 +37,6 @@ import {
   StatNumber,
   Table,
   Tbody,
-  Text,
   Th,
   Thead,
   Tr,
@@ -48,6 +50,8 @@ import CardHeader from "components/Card/CardHeader.js";
 import BarChart from "components/Charts/BarChart";
 import LineChart from "components/Charts/LineChart";
 import IconBox from "components/Icons/IconBox";
+import LegalFormats from "components/Tables/LegalFormats";
+import StatMenu from "components/Menu/StatMenu";
 // Icons
 import {
   CartIcon,
@@ -59,9 +63,9 @@ import {
 } from "components/Icons/Icons.js";
 import DashboardTableRow from "components/Tables/DashboardTableRow";
 import TimelineRow from "components/Tables/TimelineRow";
-import {React, useState, useEffect} from "react";
+import { React, useState, useEffect } from "react";
 import { AiFillCheckCircle } from "react-icons/ai";
-import { BiHappy } from "react-icons/bi";
+import { MdLandscape } from "react-icons/md";
 import { BsArrowRight } from "react-icons/bs";
 import {
   IoCheckmarkDoneCircleSharp,
@@ -83,88 +87,120 @@ import {
 import { useDeck } from "components/context/DeckContext";
 
 export default function Dashboard() {
-  const { deck } = useDeck();
-  const [enrichedDeck, setEnrichedDeck] = useState(null);
+  const { deck, organizeCardsByZone, analyzeDeckLegality } = useDeck();
+  const [selectedStat, setSelectedStat] = useState("creatures");
 
+  const cardsByZone = organizeCardsByZone(deck);
 
-  console.log(deck);
+  console.log(cardsByZone.Main);
 
-  const calculateDeckStats = (deck) => {
-    if (!deck?.length) return null;
+  const calculateDeckStats = (cardsByZone) => {
+    const mainDeck = cardsByZone.Main;
+    if (!mainDeck?.length) return null;
 
-    console.log(deck[0].extraData);
-
-    let landCount = deck.filter((card) => card.typeLine?.includes("Land"))
-      .length;
+    const highestQuatityCard = mainDeck.reduce((highest, current) =>
+      current.quantity > highest.quantity ? current : highest
+    );
+    const totalCards = mainDeck.reduce((sum, card) => sum + card.quantity, 0);
+    const landCount = mainDeck.reduce(
+      (sum, card) =>
+        card.typeLine?.includes("Land") ? sum + card.quantity : sum,
+      0
+    );
 
     return {
-
+      deckSize: totalCards,
+      legality: analyzeDeckLegality(mainDeck, totalCards, highestQuatityCard),
       manaStats: {
+        landPercentage: (landCount / totalCards) * 100,
+        producingManaPercentage:
+          mainDeck.reduce(
+            (sum, card) =>
+              card.extraData?.produced_mana ? sum + card.quantity : sum,
+            0
+          ) / totalCards,
         averageCmc:
-          deck.reduce((acc, card) => acc + (card.cmc || 0), 0) / deck.length,
-        colorDistribution: deck.reduce((acc, card) => {
-          card.colors?.forEach((color) => (acc[color] = (acc[color] || 0) + 1));
+          mainDeck.reduce(
+            (acc, card) => acc + (card.cmc || 0) * card.quantity,
+            0
+          ) / totalCards,
+        colorDistribution: mainDeck.reduce((acc, card) => {
+          card.colors?.forEach(
+            (color) => (acc[color] = (acc[color] || 0) + card.quantity)
+          );
           return acc;
         }, {}),
       },
 
       typeStats: {
-        creatures: deck.filter((card) => card.typeLine?.includes("Creature"))
-          .length,
-        instants: deck.filter((card) => card.typeLine?.includes("Instant"))
-          .length,
-        sorceries: deck.filter((card) => card.typeLine?.includes("Sorcery"))
-          .length,
-        artifacts: deck.filter((card) => card.typeLine?.includes("Artifact"))
-          .length,
-        enchantments: deck.filter((card) =>
-          card.typeLine?.includes("Enchantment")
-        ).length,
-        lands: landCount,
-        landPercentage: (landCount / deck.length) * 100,
-      },
-
-      rarityStats: {
-        common: deck.filter((card) => card.rarity === "common").length,
-        uncommon: deck.filter((card) => card.rarity === "uncommon").length,
-        rare: deck.filter((card) => card.rarity === "rare").length,
-        mythic: deck.filter((card) => card.rarity === "mythic").length,
-      },
-
-      valueStats: {
-        totalCost: deck.reduce(
-          (acc, card) => acc + Number(card.prices?.usd || 0),
+        creatures: mainDeck.reduce(
+          (sum, card) =>
+            card.typeLine?.includes("Creature") ? sum + card.quantity : sum,
           0
         ),
-        averageCardPrice:
-          deck.reduce((acc, card) => acc + Number(card.prices?.usd || 0), 0) /
-          deck.length,
-        mostExpensiveCard: deck.reduce((prev, curr) =>
-          Number(curr.prices?.usd || 0) > Number(prev.prices?.usd || 0)
-            ? curr
-            : prev
+        instants: mainDeck.reduce(
+          (sum, card) =>
+            card.typeLine?.includes("Instant") ? sum + card.quantity : sum,
+          0
         ),
+        sorceries: mainDeck.reduce(
+          (sum, card) =>
+            card.typeLine?.includes("Sorcery") ? sum + card.quantity : sum,
+          0
+        ),
+        artifacts: mainDeck.reduce(
+          (sum, card) =>
+            card.typeLine?.includes("Artifact") ? sum + card.quantity : sum,
+          0
+        ),
+        enchantments: mainDeck.reduce(
+          (sum, card) =>
+            card.typeLine?.includes("Enchantment") ? sum + card.quantity : sum,
+          0
+        ),
+        lands: landCount,
+        landPercentage: (landCount / totalCards) * 100,
       },
 
       powerStats: {
         averagePower:
-          deck.reduce((acc, card) => acc + (Number(card.extraData.power) || 0), 0) /
-          deck.filter((card) => card.extraData.power).length,
+          mainDeck.reduce(
+            (acc, card) =>
+              acc + (Number(card.extraData.power) || 0) * card.quantity,
+            0
+          ) /
+          mainDeck.reduce(
+            (sum, card) => (card.extraData.power ? sum + card.quantity : sum),
+            0
+          ),
         averageToughness:
-          deck.reduce((acc, card) => acc + (Number(card.extraData.toughness) || 0), 0) /
-          deck.filter((card) => card.extraData.toughness).length,
+          mainDeck.reduce(
+            (acc, card) =>
+              acc + (Number(card.extraData.toughness) || 0) * card.quantity,
+            0
+          ) /
+          mainDeck.reduce(
+            (sum, card) =>
+              card.extraData.toughness ? sum + card.quantity : sum,
+            0
+          ),
       },
 
-      setStats: {
-        setDistribution: deck.reduce((acc, card) => {
-          acc[card.setName] = (acc[card.setName] || 0) + 1;
-          return acc;
-        }, {}),
+      valueStats: {
+        totalCost: mainDeck.reduce(
+          (acc, card) => acc + Number(card.prices?.usd || 0) * card.quantity,
+          0
+        ),
+        averageCardPrice:
+          mainDeck.reduce(
+            (acc, card) => acc + Number(card.prices?.usd || 0) * card.quantity,
+            0
+          ) / totalCards,
       },
     };
   };
 
-  const deckStats = calculateDeckStats(enrichedDeck || deck);
+  const deckStats = calculateDeckStats(cardsByZone);
 
   return (
     <Flex flexDirection="column" pt={{ base: "120px", md: "75px" }}>
@@ -292,18 +328,13 @@ export default function Dashboard() {
         <Card p="28px 0px 0px 0px">
           <CardHeader mb="20px" ps="22px">
             <Flex direction="column" alignSelf="flex-start">
-              <Text fontSize="lg" color="#fff" fontWeight="bold" mb="6px">
-                ${deckStats?.valueStats.totalCost.toFixed(2) || "N/A"}
-              </Text>
-              <Text fontSize="md" fontWeight="medium" color="gray.400">
-                Oracle Text
-              </Text>
+              <LegalFormats
+                fullyLegalFormats={deckStats.legality.fullyLegalFormats}
+              />
             </Flex>
           </CardHeader>
-          <Box w="100%" minH={{ sm: "300px" }}>
-            <Text color="#fff" p="22px">
-              ${deck?.extraData.oracle_text || "N/A"}
-            </Text>
+          <Box w="100%" minH={{ sm: "20px" }}>
+            <Text color="#fff" p="22px"></Text>
           </Box>
         </Card>
         {/* Satisfaction Rate */}
@@ -311,10 +342,7 @@ export default function Dashboard() {
           <CardHeader mb="24px">
             <Flex direction="column">
               <Text color="#fff" fontSize="lg" fontWeight="bold" mb="4px">
-                Satisfaction Rate
-              </Text>
-              <Text color="gray.400" fontSize="sm">
-                From all projects
+                Land percentage
               </Text>
             </Flex>
           </CardHeader>
@@ -351,7 +379,10 @@ export default function Dashboard() {
                   fill="none"
                   strokeWidth="15"
                   strokeDasharray="581.1946409141117"
-                  strokeDashoffset={581.1946409141117 * (1 - 0.8)} // Adjust for progress (80% in this case)
+                  strokeDashoffset={
+                    581.1946409141117 *
+                    (1 - deckStats?.manaStats.landPercentage / 100)
+                  }
                   strokeLinecap="round"
                   stroke="url(#progressGradient)"
                 />
@@ -366,7 +397,7 @@ export default function Dashboard() {
                 justifyContent="center"
               >
                 <IconBox bg="brand.200" borderRadius="50%" w="48px" h="48px">
-                  <Icon as={BiHappy} color="#fff" w="30px" h="30px" />
+                  <Icon as={MdLandscape} color="#fff" w="30px" h="30px" />
                 </IconBox>
               </Flex>
             </Box>
@@ -387,10 +418,10 @@ export default function Dashboard() {
               </Text>
               <Flex direction="column" align="center" minW="80px">
                 <Text color="#fff" fontSize="28px" fontWeight="bold">
-                  95%
+                  {deckStats?.manaStats.landPercentage.toFixed(2) || "N/A"}%
                 </Text>
                 <Text fontSize="xs" color="gray.400">
-                  Based on likes
+                  Based on mainboard
                 </Text>
               </Flex>
               <Text fontSize="xs" color="gray.400">
@@ -399,23 +430,14 @@ export default function Dashboard() {
             </Stack>
           </Flex>
         </Card>
-        {/* Referral Tracking */}
+        {/* */}
         <Card gridArea={{ md: "2 / 2 / 3 / 3", "2xl": "auto" }}>
           <Flex direction="column">
             <Flex justify="space-between" align="center" mb="40px">
               <Text color="#fff" fontSize="lg" fontWeight="bold">
-                Referral Tracking
+                Deck Compisition
               </Text>
-              <Button
-                borderRadius="12px"
-                w="38px"
-                h="38px"
-                bg="#22234B"
-                _hover="none"
-                _active="none"
-              >
-                <Icon as={IoEllipsisHorizontal} color="#7551FF" />
-              </Button>
+              <StatMenu setSelectedStat={setSelectedStat} />
             </Flex>
             <Flex direction={{ sm: "column", md: "row" }}>
               <Flex
@@ -433,25 +455,27 @@ export default function Dashboard() {
                   mb="20px"
                 >
                   <Text color="gray.400" fontSize="sm" mb="4px">
-                    Invited
+                    {selectedStat.charAt(0).toUpperCase() +
+                      selectedStat.slice(1)}
                   </Text>
                   <Text color="#fff" fontSize="lg" fontWeight="bold">
-                    145 people
+                    {deckStats?.typeStats[selectedStat]}
                   </Text>
                 </Flex>
                 <Flex
                   direction="column"
                   p="22px"
-                  pe={{ sm: "22px", md: "8px", lg: "22px" }}
-                  minW={{ sm: "170px", md: "140px", lg: "170px" }}
+                  pe={{ sm: "22e", md: "8px", lg: "22px" }}
+                  minW={{ sm: "220px", md: "140px", lg: "220px" }}
                   bg="linear-gradient(126.97deg, #060C29 28.26%, rgba(4, 12, 48, 0.5) 91.2%)"
                   borderRadius="20px"
+                  mb="20px"
                 >
                   <Text color="gray.400" fontSize="sm" mb="4px">
-                    Bonus
+                    Deck Size
                   </Text>
                   <Text color="#fff" fontSize="lg" fontWeight="bold">
-                    1,465
+                    {deckStats?.deckSize}
                   </Text>
                 </Flex>
               </Flex>
@@ -487,7 +511,12 @@ export default function Dashboard() {
                     fill="none"
                     strokeWidth="15"
                     strokeDasharray="581.1946409141117"
-                    strokeDashoffset={581.1946409141117 * (1 - 0.7)} // Adjust for progress (70% in this case)
+                    strokeDashoffset={
+                      581.1946409141117 *
+                      (1 -
+                        deckStats?.typeStats[selectedStat] /
+                          deckStats?.deckSize)
+                    } // Adjust for progress (70% in this case)
                     strokeLinecap="round"
                     stroke="url(#safetyGradient)"
                   />
@@ -503,18 +532,24 @@ export default function Dashboard() {
                   flexDirection="column"
                 >
                   <Text color="gray.400" fontSize="sm">
-                    Safety
+                    {selectedStat.charAt(0).toUpperCase() +
+                      selectedStat.slice(1)}
                   </Text>
                   <Text
                     color="#fff"
-                    fontSize={{ md: "36px", lg: "50px" }}
+                    fontSize={{ md: "36px", lg: "43px" }}
                     fontWeight="bold"
                     mb="4px"
                   >
-                    9.3
+                    {(
+                      (deckStats?.typeStats[selectedStat] /
+                        deckStats?.deckSize) *
+                      100
+                    ).toFixed(1)}
+                    %
                   </Text>
                   <Text color="gray.400" fontSize="sm">
-                    Total Score
+                    Total Percentage
                   </Text>
                 </Flex>
               </Box>
@@ -550,7 +585,7 @@ export default function Dashboard() {
             />
           </Box>
         </Card>
-        {/* Active Users */}
+        {/* */}
         <Card p="16px">
           <CardBody>
             <Flex direction="column" w="100%">
