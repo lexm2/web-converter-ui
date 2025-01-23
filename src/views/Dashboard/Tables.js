@@ -155,6 +155,7 @@ function Tables() {
     "Planes/Schemes",
     "Maybeboard",
   ];
+  
   const cardsByZone = zones.reduce((acc, zone) => {
     acc[zone] = deck.filter((card) => card.zone === zone);
     return acc;
