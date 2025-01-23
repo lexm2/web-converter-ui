@@ -89,7 +89,6 @@ function Tables() {
     setLoadingPrints(true);
     const artPrintings = await getCardPrints(card);
     setLoadingPrints(false);
-    console.log(artPrintings);
     if (artPrintings && artPrintings.length > 0) {
       const currentCardIndex = artPrintings.findIndex(
         (print) => print.id === card.id

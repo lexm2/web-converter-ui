@@ -221,7 +221,6 @@ function moveImageToFront(cardOracleId, cardIndex) {
 }
 
 function getPrintData(cardOracleID, index) {
-  console.log(cardPrintsCache);
   const print = cardPrintsCache[cardOracleID];
   if (print.dualsided) {
     console.log("dualsided");
