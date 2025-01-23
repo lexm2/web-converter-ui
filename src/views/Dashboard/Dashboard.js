@@ -41,9 +41,6 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
-// Styles for the circular progressbar
-import medusa from "assets/img/cardimgfree.png";
-// Custom components
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
@@ -52,320 +49,25 @@ import LineChart from "components/Charts/LineChart";
 import IconBox from "components/Icons/IconBox";
 import LegalFormats from "components/Tables/LegalFormats";
 import StatMenu from "components/Menu/StatMenu";
-// Icons
-import {
-  CartIcon,
-  DocumentIcon,
-  GlobeIcon,
-  RocketIcon,
-  StatsIcon,
-  WalletIcon,
-} from "components/Icons/Icons.js";
-import DashboardTableRow from "components/Tables/DashboardTableRow";
-import TimelineRow from "components/Tables/TimelineRow";
 import { React, useState, useEffect } from "react";
-import { AiFillCheckCircle } from "react-icons/ai";
 import { MdLandscape } from "react-icons/md";
-import { BsArrowRight } from "react-icons/bs";
-import {
-  IoCheckmarkDoneCircleSharp,
-  IoEllipsisHorizontal,
-} from "react-icons/io5";
 import {
   TiCreditCard,
   TiChartPieOutline,
   TiStarburstOutline,
   TiBook,
 } from "react-icons/ti";
+import { FaShield, FaPerson } from "react-icons/fa6";
+import { GiArrowsShield, GiSpellBook, GiMagicAxe, GiGlowingArtifact} from "react-icons/gi";
 // Data
-import {
-  barChartDataDashboard,
-  barChartOptionsDashboard,
-  lineChartDataDashboard,
-  lineChartOptionsDashboard,
-} from "variables/charts";
 import { useDeck } from "components/context/DeckContext";
+import { StatCard } from "components/Dashboard/StatCard";
+import { calculateDeckStats } from "utils/deckStats";
 
 export default function Dashboard() {
-  const { deck, organizeCardsByZone, analyzeDeckLegality } = useDeck();
+  const { deck, organizeCardsByZone } = useDeck();
   const cardsByZone = organizeCardsByZone(deck);
   const [selectedStat, setSelectedStat] = useState("creatures");
-  const [showChart, setShowChart] = useState(false);
-
-  const calculateDeckStats = (cardsByZone) => {
-    const mainDeck = cardsByZone.Main;
-    if (!mainDeck?.length) return null;
-
-    const highestQuatityCard = mainDeck.reduce((highest, current) =>
-      current.quantity > highest.quantity ? current : highest
-    );
-    const totalCards = mainDeck.reduce((sum, card) => sum + card.quantity, 0);
-    const landCount = mainDeck.reduce(
-      (sum, card) =>
-        card.typeLine?.includes("Land") ? sum + card.quantity : sum,
-      0
-    );
-
-    const typeStats = {
-      creatures: mainDeck.reduce(
-        (sum, card) =>
-          card.typeLine?.includes("Creature") ? sum + card.quantity : sum,
-        0
-      ),
-      instants: mainDeck.reduce(
-        (sum, card) =>
-          card.typeLine?.includes("Instant") ? sum + card.quantity : sum,
-        0
-      ),
-      sorceries: mainDeck.reduce(
-        (sum, card) =>
-          card.typeLine?.includes("Sorcery") ? sum + card.quantity : sum,
-        0
-      ),
-      artifacts: mainDeck.reduce(
-        (sum, card) =>
-          card.typeLine?.includes("Artifact") ? sum + card.quantity : sum,
-        0
-      ),
-      enchantments: mainDeck.reduce(
-        (sum, card) =>
-          card.typeLine?.includes("Enchantment") ? sum + card.quantity : sum,
-        0
-      ),
-      lands: landCount,
-      landPercentage: (landCount / totalCards) * 100,
-    };
-
-    let typeDistributions = {
-      creatures: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 },
-      instants: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 },
-      sorceries: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 },
-      enchantments: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 },
-      artifacts: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 },
-      lands: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 },
-    };
-
-    const manaCurve = {
-      distribution: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 },
-      chartData: [
-        {
-          name: "Creatures",
-          data: [0, 0, 0, 0, 0, 0, 0, 0],
-          color: "#E53E3E",
-        },
-        {
-          name: "Instants",
-          data: [0, 0, 0, 0, 0, 0, 0, 0],
-          color: "#3182CE",
-        },
-        {
-          name: "Sorceries",
-          data: [0, 0, 0, 0, 0, 0, 0, 0],
-          color: "#805AD5",
-        },
-        {
-          name: "Enchantments",
-          data: [0, 0, 0, 0, 0, 0, 0, 0],
-          color: "#D69E2E",
-        },
-        {
-          name: "Artifacts",
-          data: [0, 0, 0, 0, 0, 0, 0, 0],
-          color: "#718096",
-        },
-        {
-          name: "Lands",
-          data: [0, 0, 0, 0, 0, 0, 0, 0],
-          color: "#48BB78",
-        },
-      ],
-      chartOptions: {
-        chart: {
-          toolbar: { show: false },
-          type: "bar",
-          stacked: true,
-        },
-        tooltip: {
-          theme: "dark",
-          title: "Mana Distribution",
-        },
-        xaxis: {
-          categories: [
-            "0 MV",
-            "1 MV",
-            "2 MV",
-            "3 MV",
-            "4 MV",
-            "5 MV",
-            "6 MV",
-            "7 MV",
-          ],
-          title: {
-            text: "Converted Mana Cost",
-            style: { color: "#A0AEC0" },
-          },
-          labels: {
-            style: { colors: "#A0AEC0" },
-          },
-        },
-        yaxis: {
-          min: 0,
-          title: {
-            text: "Number of Cards",
-            style: { color: "#A0AEC0" },
-          },
-          labels: {
-            style: { colors: "#A0AEC0" },
-          },
-        },
-        xaxis: {
-          categories: [
-            "0 MV",
-            "1 MV",
-            "2 MV",
-            "3 MV",
-            "4 MV",
-            "5 MV",
-            "6 MV",
-            "7 MV",
-          ],
-        },
-      },
-    };
-
-    mainDeck.forEach((card) => {
-      const manaCost = card.cmc || 0;
-      if (card.typeLine?.includes("Land")) {
-        typeDistributions.lands[manaCost] += card.quantity;
-      }
-      if (card.typeLine?.includes("Creature")) {
-        typeDistributions.creatures[manaCost] += card.quantity;
-      }
-      if (card.typeLine?.includes("Instant")) {
-        typeDistributions.instants[manaCost] += card.quantity;
-      }
-      if (card.typeLine?.includes("Sorcery")) {
-        typeDistributions.sorceries[manaCost] += card.quantity;
-      }
-      if (card.typeLine?.includes("Enchantment")) {
-        typeDistributions.enchantments[manaCost] += card.quantity;
-      }
-      if (card.typeLine?.includes("Artifact")) {
-        typeDistributions.artifacts[manaCost] += card.quantity;
-      }
-    });
-
-    manaCurve.chartData = [
-      {
-        name: "Creatures",
-        data: Object.values(typeDistributions.creatures),
-        color: "#E53E3E",
-      },
-      {
-        name: "Instants",
-        data: Object.values(typeDistributions.instants),
-        color: "#3182CE",
-      },
-      {
-        name: "Sorceries",
-        data: Object.values(typeDistributions.sorceries),
-        color: "#805AD5",
-      },
-      {
-        name: "Enchantments",
-        data: Object.values(typeDistributions.enchantments),
-        color: "#D69E2E",
-      },
-      {
-        name: "Artifacts",
-        data: Object.values(typeDistributions.artifacts),
-        color: "#718096",
-      },
-      {
-        name: "Lands",
-        data: Object.values(typeDistributions.lands),
-        color: "#48BB78",
-      },
-    ];
-
-    return {
-      deckSize: totalCards,
-      legality: analyzeDeckLegality(mainDeck, totalCards, highestQuatityCard),
-      valueStats: {
-        totalCost: mainDeck.reduce(
-          (acc, card) => acc + Number(card.prices?.usd || 0) * card.quantity,
-          0
-        ),
-        averageCardPrice:
-          mainDeck.reduce(
-            (acc, card) => acc + Number(card.prices?.usd || 0) * card.quantity,
-            0
-          ) / totalCards,
-      },
-      manaStats: {
-        landPercentage: (landCount / totalCards) * 100,
-        producingManaPercentage:
-          mainDeck.reduce(
-            (sum, card) =>
-              card.extraData?.produced_mana ? sum + card.quantity : sum,
-            0
-          ) / totalCards,
-        averageCmc:
-          mainDeck.reduce(
-            (acc, card) => acc + (card.cmc || 0) * card.quantity,
-            0
-          ) / totalCards,
-        colorDistribution: mainDeck.reduce((acc, card) => {
-          card.colors?.forEach(
-            (color) => (acc[color] = (acc[color] || 0) + card.quantity)
-          );
-          return acc;
-        }, {}),
-      },
-      typeStats,
-      manaCurve,
-      powerStats: {
-        averagePower:
-          mainDeck.reduce(
-            (acc, card) =>
-              acc + (Number(card.extraData?.power) || 0) * card.quantity,
-            0
-          ) /
-          mainDeck.reduce(
-            (sum, card) => (card.extraData?.power ? sum + card.quantity : sum),
-            0
-          ),
-        averageToughness:
-          mainDeck.reduce(
-            (acc, card) =>
-              acc + (Number(card.extraData?.toughness) || 0) * card.quantity,
-            0
-          ) /
-          mainDeck.reduce(
-            (sum, card) =>
-              card.extraData?.toughness ? sum + card.quantity : sum,
-            0
-          ),
-      },
-      distributionStats: {
-        avgCreaturesPerMV:
-          typeStats.creatures / Object.keys(manaCurve.distribution).length,
-        avgSpellsPerMV:
-          (typeStats.instants + typeStats.sorceries) /
-          Object.keys(manaCurve.distribution).length,
-        avgEnchantmentsPerMV:
-          typeStats.enchantments / Object.keys(manaCurve.distribution).length,
-        avgArtifactsPerMV:
-          typeStats.artifacts / Object.keys(manaCurve.distribution).length,
-        maxTypeCount: Math.max(
-          typeStats.creatures,
-          typeStats.instants + typeStats.sorceries,
-          typeStats.enchantments,
-          typeStats.artifacts
-        ),
-      },
-    };
-  };
 
   const deckStats = calculateDeckStats(cardsByZone);
 
@@ -410,119 +112,26 @@ export default function Dashboard() {
   return (
     <Flex flexDirection="column" pt={{ base: "120px", md: "75px" }}>
       <SimpleGrid columns={{ sm: 1, md: 2, xl: 4 }} spacing="24px">
-        {/* Average CMC */}
-        <Card>
-          <CardBody>
-            <Flex flexDirection="row" align="center" justify="center" w="100%">
-              <Stat>
-                <StatLabel
-                  fontSize="sm"
-                  color="gray.400"
-                  fontWeight="bold"
-                  pb="2px"
-                >
-                  Average CMC
-                </StatLabel>
-                <Flex>
-                  <StatNumber fontSize="lg" color="#fff">
-                    {deckStats?.manaStats.averageCmc.toFixed(2) || "N/A"}
-                  </StatNumber>
-                </Flex>
-              </Stat>
-              <Spacer />
-              <IconBox as="box" h={"45px"} w={"45px"} bg="brand.200">
-                <Icon as={TiBook} h={"24px"} w={"24px"} color="#fff" />
-              </IconBox>
-            </Flex>
-          </CardBody>
-        </Card>
-
-        {/* Total Cost */}
-        <Card>
-          <CardBody>
-            <Flex flexDirection="row" align="center" justify="center" w="100%">
-              <Stat>
-                <StatLabel
-                  fontSize="sm"
-                  color="gray.400"
-                  fontWeight="bold"
-                  pb="2px"
-                >
-                  Total Cost
-                </StatLabel>
-                <Flex>
-                  <StatNumber fontSize="lg" color="#fff">
-                    ${deckStats?.valueStats.totalCost.toFixed(2) || "N/A"}
-                  </StatNumber>
-                </Flex>
-              </Stat>
-              <Spacer />
-              <IconBox as="box" h={"45px"} w={"45px"} bg="brand.200">
-                <Icon as={TiCreditCard} h={"24px"} w={"24px"} color="#fff" />
-              </IconBox>
-            </Flex>
-          </CardBody>
-        </Card>
-        {/* Average Power */}
-        <Card>
-          <CardBody>
-            <Flex flexDirection="row" align="center" justify="center" w="100%">
-              <Stat me="auto">
-                <StatLabel
-                  fontSize="sm"
-                  color="gray.400"
-                  fontWeight="bold"
-                  pb="2px"
-                >
-                  Average Power
-                </StatLabel>
-                <Flex>
-                  <StatNumber fontSize="lg" color="#fff" fontWeight="bold">
-                    {deckStats?.powerStats.averagePower.toFixed(2) || "N/A"}
-                  </StatNumber>
-                </Flex>
-              </Stat>
-              <IconBox as="box" h={"45px"} w={"45px"} bg="brand.200">
-                <Icon
-                  as={TiStarburstOutline}
-                  h={"24px"}
-                  w={"24px"}
-                  color="#fff"
-                />
-              </IconBox>
-            </Flex>
-          </CardBody>
-        </Card>
-        {/* Average Toughness */}
-        <Card minH="83px">
-          <CardBody>
-            <Flex flexDirection="row" align="center" justify="center" w="100%">
-              <Stat me="auto">
-                <StatLabel
-                  fontSize="sm"
-                  color="gray.400"
-                  fontWeight="bold"
-                  pb="2px"
-                >
-                  Average Toughness
-                </StatLabel>
-                <Flex>
-                  <StatNumber fontSize="lg" color="#fff">
-                    {deckStats?.powerStats.averageToughness.toFixed(2) || "N/A"}
-                  </StatNumber>
-                </Flex>
-              </Stat>
-              <IconBox as="box" h={"45px"} w={"45px"} bg="brand.200">
-                <Icon
-                  as={TiChartPieOutline}
-                  h={"24px"}
-                  w={"24px"}
-                  color="#fff"
-                />
-              </IconBox>
-            </Flex>
-          </CardBody>
-        </Card>
+        <StatCard
+          label="Average CMC"
+          value={deckStats.manaStats.averageCmc.toFixed(2)}
+          icon={TiChartPieOutline}
+        />
+        <StatCard
+          label="Total Cost"
+          value={`$${deckStats.valueStats.totalCost.toFixed(2)}`}
+          icon={TiCreditCard}
+        />
+        <StatCard
+          label="Average Power"
+          value={deckStats.powerStats.averagePower.toFixed(2)}
+          icon={GiArrowsShield}
+        />
+        <StatCard
+          label="Average Toughness"
+          value={deckStats.powerStats.averageToughness.toFixed(2)}
+          icon={FaShield}
+        />
       </SimpleGrid>
       <Grid
         templateColumns={{ sm: "1fr", md: "1fr 1fr", "2xl": "2fr 1.2fr 1.5fr" }}
@@ -533,8 +142,9 @@ export default function Dashboard() {
         <Card p="28px 0px 0px 0px">
           <CardHeader mb="20px" ps="22px">
             <Flex direction="column" alignSelf="flex-start">
+              {console.log(deckStats?.deckLegality.deckLegality)}
               <LegalFormats
-                fullyLegalFormats={deckStats.legality.fullyLegalFormats}
+                deckLegality={deckStats?.deckLegality.deckLegality}
               />
             </Flex>
           </CardHeader>
@@ -828,7 +438,7 @@ export default function Dashboard() {
                       bg="brand.200"
                       me="6px"
                     >
-                      <TiStarburstOutline h={"15px"} w={"15px"} color="#fff" />
+                      <FaPerson h={"15px"} w={"15px"} color="#fff" />
                     </IconBox>
                     <Text fontSize="sm" color="gray.400">
                       Avg Creatures/MV
@@ -867,7 +477,7 @@ export default function Dashboard() {
                       bg="brand.200"
                       me="6px"
                     >
-                      <TiChartPieOutline h={"15px"} w={"15px"} color="#fff" />
+                      <GiSpellBook h={"15px"} w={"15px"} color="#fff" />
                     </IconBox>
                     <Text fontSize="sm" color="gray.400">
                       Avg Spell/MV
@@ -905,7 +515,7 @@ export default function Dashboard() {
                       bg="brand.200"
                       me="6px"
                     >
-                      <TiBook h={"15px"} w={"15px"} color="#fff" />
+                      <GiMagicAxe h={"15px"} w={"15px"} color="#fff" />
                     </IconBox>
                     <Text fontSize="sm" color="gray.400">
                       Avg Enchantments/MV
@@ -944,7 +554,7 @@ export default function Dashboard() {
                       bg="brand.200"
                       me="6px"
                     >
-                      <TiCreditCard h={"15px"} w={"15px"} color="#fff" />
+                      <GiGlowingArtifact h={"15px"} w={"15px"} color="#fff" />
                     </IconBox>
                     <Text fontSize="sm" color="gray.400">
                       Avg Artifacts/MV

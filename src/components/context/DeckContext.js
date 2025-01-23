@@ -85,28 +85,29 @@ export const DeckProvider = ({ children }) => {
 
   const analyzeDeckLegality = (mainDeck, totalCards, highestQuantityCard) => {
     const formatRules = {
-      alchemy: { maxCopies: 4, minDeckSize: 30 },
-      brawl: { maxCopies: 1, minDeckSize: 60, maxDeckSize: null},
-      commander: { maxCopies: 1, minDeckSize: 100 },
-      duel: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
-      explorer: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
-      future:  { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
-      gladiator: { maxCopies: 1, minDeckSize: 100, maxDeckSize: null },
-      historic: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
-      legacy: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
-      modern: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
-      oathbreaker: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
-      oldschool: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
-      pauper: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
-      paupercommander: { maxCopies: 1, minDeckSize: 100 },
-      penny: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
-      pioneer: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
-      predh: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
-      premodern: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
-      standard: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
-      standardbrawl: { maxCopies: 1, minDeckSize: 60, maxDeckSize: null},
-      timeless: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
-      vintage: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      standard: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null },
+      brawl: { maxCopies: 1, minDeckSize: 60, maxDeckSize: 60 },
+      pioneer: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null },
+      modern: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null },
+      legacy: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null },
+      vintage: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null },
+      commander: { maxCopies: 1, minDeckSize: 100, maxDeckSize: 100 },
+
+      // alchemy: { maxCopies: 4, minDeckSize: 30 },
+      // duel: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      // explorer: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      // future:  { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      // gladiator: { maxCopies: 1, minDeckSize: 100, maxDeckSize: null },
+      // historic: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      // oathbreaker: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      // oldschool: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      // pauper: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      // paupercommander: { maxCopies: 1, minDeckSize: 100 },
+      // penny: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      // predh: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      // premodern: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
+      // standardbrawl: { maxCopies: 1, minDeckSize: 60, maxDeckSize: null},
+      // timeless: { maxCopies: 4, minDeckSize: 60, maxDeckSize: null},
     };
 
     const legalFormats = mainDeck.reduce((acc, card) => {
@@ -122,7 +123,7 @@ export const DeckProvider = ({ children }) => {
       (acc, [format, rules]) => {
         const isLegalSize = rules.maxDeckSize
           ? totalCards >= rules.minDeckSize && totalCards <= rules.maxDeckSize
-          : totalCards === rules.minDeckSize;
+          : totalCards >= rules.minDeckSize;
 
         acc[format] = {
           isLegal:
