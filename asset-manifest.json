@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/web-converter-ui/static/css/main.566ac412.css",
-    "main.js": "/web-converter-ui/static/js/main.293a22e1.js",
+    "main.css": "/web-converter-ui/static/css/main.61f2aa1b.css",
+    "main.js": "/web-converter-ui/static/js/main.fe09ba3d.js",
     "static/media/signInImage.png": "/web-converter-ui/static/media/signInImage.7c12b6aac9bdc3d3729b.png",
     "static/media/background-body-admin.png": "/web-converter-ui/static/media/background-body-admin.9a5703c114bec6efe39b.png",
     "static/media/White.svg": "/web-converter-ui/static/media/White.6bcc68150b061ae03fefb9a46527ce96.svg",
@@ -11,11 +11,11 @@
     "static/media/Colorless.svg": "/web-converter-ui/static/media/Colorless.0fd7d84e8fdb0e38e309e36146f9e4c1.svg",
     "index.html": "/web-converter-ui/index.html",
     "static/media/Blue.svg": "/web-converter-ui/static/media/Blue.4b7eda4563ea2f6e65239d5e3b9de1b2.svg",
-    "main.566ac412.css.map": "/web-converter-ui/static/css/main.566ac412.css.map",
-    "main.293a22e1.js.map": "/web-converter-ui/static/js/main.293a22e1.js.map"
+    "main.61f2aa1b.css.map": "/web-converter-ui/static/css/main.61f2aa1b.css.map",
+    "main.fe09ba3d.js.map": "/web-converter-ui/static/js/main.fe09ba3d.js.map"
   },
   "entrypoints": [
-    "static/css/main.566ac412.css",
-    "static/js/main.293a22e1.js"
+    "static/css/main.61f2aa1b.css",
+    "static/js/main.fe09ba3d.js"
   ]
 }
