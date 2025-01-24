@@ -220,9 +220,135 @@ export const calculateDeckStats = (cardsByZone) => {
     },
   ];
 
+  const landDrawChartOptions = {
+    chart: {
+      id: "land-probability",
+      toolbar: { show: false },
+      type: "line",
+    },
+    xaxis: {
+      categories: [
+        "First Hand",
+        "Mullugan 1",
+        "Mullugan 2",
+        "Mullugan 3",
+        "Mullugan 4",
+        "Mullugan 5",
+        "Mullugan 6",
+      ],
+      labels: { style: { colors: "#A0AEC0" } },
+    },
+    yaxis: {
+      title: {
+        text: "Probability (%)",
+        style: { color: "#A0AEC0" },
+      },
+      labels: { style: { colors: "#A0AEC0" } },
+    },
+    errorBar: {
+      show: true,
+      color: "#ffffff",
+      width: 2,
+      strokeWidth: 1,
+      capWidth: 4,
+    },
+    markers: {
+      size: 4,
+    },
+  };
+
+  const calculateOpeningHandLandProbability = (deckSize, typeStat) => {
+    const calculateProbability = (count) => {
+      let probabilities = [];
+
+      // For each mulligan step
+      for (let mulligan = 0; mulligan < 7; mulligan++) {
+        const handSizeAfterMulligan = 7 - mulligan;
+        const statSizeAfterMulligan = count - mulligan;
+        const deckSizeAfterMulligan = deckSize - mulligan;
+
+        const mean = Math.max(
+          (handSizeAfterMulligan * statSizeAfterMulligan) /
+            deckSizeAfterMulligan,
+          0
+        ).toFixed(2);
+
+        // Hypergeometric variance formula
+        const variance =
+          handSizeAfterMulligan *
+          (statSizeAfterMulligan / deckSizeAfterMulligan) *
+          ((deckSizeAfterMulligan - statSizeAfterMulligan) /
+            deckSizeAfterMulligan) *
+          ((deckSizeAfterMulligan - handSizeAfterMulligan) /
+            (deckSizeAfterMulligan - 1));
+
+        const stdDev = Math.sqrt(variance).toFixed(2);
+
+        const x = mulligan === 0 ? "First Hand" : "Mulligan " + mulligan;
+
+        probabilities.push({
+          x: x,
+          y: mean,
+          errorBar: {
+            upper: mean + stdDev,
+            lower: mean - stdDev,
+          },
+        });
+      }
+
+      return probabilities;
+    };
+
+    console.log(calculateProbability(typeStat.lands));
+
+    return [
+      {
+        name: "Lands",
+        data: calculateProbability(typeStat.lands),
+        color: "#48BB78",
+      },
+      {
+        name: "Creatures",
+        data: calculateProbability(typeStat.creatures),
+        color: "#E53E3E",
+      },
+      {
+        name: "Instants",
+        data: calculateProbability(typeStat.instants),
+        color: "#3182CE",
+      },
+      {
+        name: "Sorceries",
+        data: calculateProbability(typeStat.sorceries),
+        color: "#805AD5",
+      },
+      {
+        name: "Enchantments",
+        data: calculateProbability(typeStat.enchantments),
+        color: "#D69E2E",
+      },
+      {
+        name: "Artifacts",
+        data: calculateProbability(typeStat.artifacts),
+        color: "#718096",
+      },
+    ];
+  };
+
   return {
+    landDrawData: {
+      drawProbability: calculateOpeningHandLandProbability(
+        totalCards,
+        typeStats
+      ),
+      landDrawChartOptions: landDrawChartOptions,
+    },
     deckSize: totalCards,
-    deckLegality: analyzeDeckLegality(mainDeck, totalCards, highestQuantityCard),
+    deckLegality: analyzeDeckLegality(
+      mainDeck,
+      totalCards,
+      highestQuantityCard
+    ),
     valueStats: {
       totalCost: mainDeck.reduce(
         (acc, card) => acc + Number(card.prices?.usd || 0) * card.quantity,

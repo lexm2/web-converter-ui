@@ -2,7 +2,6 @@ import React from "react";
 import { Box, Text, SimpleGrid, Flex, Badge, Tooltip } from "@chakra-ui/react";
 
 const LegalFormats = ({ deckLegality }) => {
-  console.log("deckLegality:", deckLegality);
   if (!deckLegality) return null;
 
   return (

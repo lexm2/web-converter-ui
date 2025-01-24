@@ -58,7 +58,12 @@ import {
   TiBook,
 } from "react-icons/ti";
 import { FaShield, FaPerson } from "react-icons/fa6";
-import { GiArrowsShield, GiSpellBook, GiMagicAxe, GiGlowingArtifact} from "react-icons/gi";
+import {
+  GiArrowsShield,
+  GiSpellBook,
+  GiMagicAxe,
+  GiGlowingArtifact,
+} from "react-icons/gi";
 // Data
 import { useDeck } from "components/context/DeckContext";
 import { StatCard } from "components/Dashboard/StatCard";
@@ -142,7 +147,6 @@ export default function Dashboard() {
         <Card p="28px 0px 0px 0px">
           <CardHeader mb="20px" ps="22px">
             <Flex direction="column" alignSelf="flex-start">
-              {console.log(deckStats?.deckLegality.deckLegality)}
               <LegalFormats
                 deckLegality={deckStats?.deckLegality.deckLegality}
               />
@@ -379,24 +383,24 @@ export default function Dashboard() {
         mb="24px"
       >
         {/* Sales Overview */}
-        {/* <Card p="28px 0px 0px 0px">
+        <Card p="28px 0px 0px 0px">
           <CardHeader mb="20px" ps="22px">
             <Flex direction="column" alignSelf="flex-start">
               <Text fontSize="lg" color="#fff" fontWeight="bold" mb="6px">
-                Mana Curve Distribution
+                Card Draw Probability
               </Text>
               <Text fontSize="md" fontWeight="medium" color="gray.400">
-                Card count by converted mana cost
+                Mean number of card types drawn in start hand
               </Text>
             </Flex>
           </CardHeader>
           <Box w="100%" minH={{ sm: "300px" }}>
             <LineChart
-              lineChartData={generateManaCurveData()}
-              lineChartOptions={manaCurveChartOptions}
+              lineChartData={deckStats.landDrawData.drawProbability}
+              lineChartOptions={deckStats.landDrawData.landDrawChartOptions}
             />
           </Box>
-        </Card> */}
+        </Card>
         {/* */}
         <Card p="16px">
           <CardBody>
