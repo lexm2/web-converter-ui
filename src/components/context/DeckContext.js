@@ -119,6 +119,10 @@ export const DeckProvider = ({ children }) => {
       return acc;
     }, {});
 
+    const fullyLegalFormats = Object.entries(legalFormats)
+      .filter(([format, count]) => count === mainDeck.length)
+      .map(([format]) => format);
+
     const deckLegality = Object.entries(formatRules).reduce(
       (acc, [format, rules]) => {
         const isLegalSize = rules.maxDeckSize
@@ -127,7 +131,9 @@ export const DeckProvider = ({ children }) => {
 
         acc[format] = {
           isLegal:
-            isLegalSize && highestQuantityCard.quantity <= rules.maxCopies,
+            isLegalSize &&
+            highestQuantityCard.quantity <= rules.maxCopies &&
+            fullyLegalFormats.includes(format),
           maxCopiesAllowed: rules.maxCopies,
           minDeckSize: rules.minDeckSize,
           maxDeckSize: rules.maxDeckSize || "unlimited",
@@ -139,10 +145,6 @@ export const DeckProvider = ({ children }) => {
       },
       {}
     );
-
-    const fullyLegalFormats = Object.entries(legalFormats)
-      .filter(([format, count]) => count === mainDeck.length)
-      .map(([format]) => format);
 
     return {
       deckLegality,
